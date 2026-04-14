@@ -1,21 +1,45 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Users, CalendarDays, CreditCard, Bell } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatCard } from "@/components/StatCard";
+import { CHILDREN } from "@/lib/mock-parent";
+import { ChildProgress } from "@/components/parent/ChildProgress";
+import { FeeStatus } from "@/components/parent/FeeStatus";
+import { AttendanceView } from "@/components/parent/AttendanceView";
+import { Communication } from "@/components/parent/Communication";
 
 export default function ParentPortal() {
+  const [selectedChildId, setSelectedChildId] = useState(CHILDREN[0].id);
+  const selectedChild = CHILDREN.find((c) => c.id === selectedChildId) || CHILDREN[0];
+  const totalPending = CHILDREN.reduce((a, c) => a + c.pendingFees, 0);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-heading font-bold">Parent Portal</h2>
-        <p className="text-muted-foreground">View your children's academic progress and updates</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-heading font-bold">Parent Portal</h2>
+          <p className="text-muted-foreground">View your children's academic progress and updates</p>
+        </div>
+        <Select value={selectedChildId} onValueChange={setSelectedChildId}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CHILDREN.map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.name} (Class {c.class}-{c.section})</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { title: "Children", value: "2", icon: Users, iconColor: "text-primary" },
-          { title: "Avg Attendance", value: "92%", change: "+1.5%", changeType: "positive" as const, icon: CalendarDays, iconColor: "text-success" },
-          { title: "Pending Fees", value: "₹25,000", icon: CreditCard, iconColor: "text-warning" },
-          { title: "Notifications", value: "5", icon: Bell, iconColor: "text-accent" },
+          { title: "Children", value: String(CHILDREN.length), icon: Users, iconColor: "text-primary" },
+          { title: "Attendance", value: `${selectedChild.attendance}%`, change: "+1.5%", changeType: "positive" as const, icon: CalendarDays, iconColor: "text-success" },
+          { title: "Pending Fees", value: totalPending > 0 ? `₹${totalPending.toLocaleString("en-IN")}` : "None", icon: CreditCard, iconColor: "text-warning" },
+          { title: "Unread Messages", value: "2", icon: Bell, iconColor: "text-accent" },
         ].map((s, i) => (
           <motion.div key={s.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
             <StatCard {...s} />
@@ -23,53 +47,19 @@ export default function ParentPortal() {
         ))}
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="rounded-2xl border bg-card p-6">
-        <h3 className="font-heading font-semibold mb-4">Children Overview</h3>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {[
-            { name: "Arjun Singh", class: "Class 10-A", attendance: "94%", grade: "A+" },
-            { name: "Kavya Singh", class: "Class 7-B", attendance: "90%", grade: "A" },
-          ].map((child, i) => (
-            <div key={i} className="p-4 rounded-xl border bg-secondary/30">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-                  {child.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-medium text-sm">{child.name}</p>
-                  <p className="text-xs text-muted-foreground">{child.class}</p>
-                </div>
-              </div>
-              <div className="flex gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground text-xs">Attendance</p>
-                  <p className="font-medium text-success">{child.attendance}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Grade</p>
-                  <p className="font-medium">{child.grade}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </motion.div>
+      <Tabs defaultValue="progress" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="progress">Academic Progress</TabsTrigger>
+          <TabsTrigger value="attendance">Attendance</TabsTrigger>
+          <TabsTrigger value="fees">Fee Status</TabsTrigger>
+          <TabsTrigger value="messages">Messages</TabsTrigger>
+        </TabsList>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="rounded-2xl border bg-card p-6">
-        <h3 className="font-heading font-semibold mb-4">Recent Notices</h3>
-        <div className="space-y-3">
-          {[
-            { title: "PTM Scheduled - January 20", date: "Jan 15" },
-            { title: "Annual Day Celebration - February 5", date: "Jan 14" },
-            { title: "Winter Uniform Guidelines", date: "Jan 10" },
-          ].map((notice, i) => (
-            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
-              <p className="text-sm font-medium">{notice.title}</p>
-              <span className="text-xs text-muted-foreground">{notice.date}</span>
-            </div>
-          ))}
-        </div>
-      </motion.div>
+        <TabsContent value="progress"><ChildProgress selectedChild={selectedChild} /></TabsContent>
+        <TabsContent value="attendance"><AttendanceView selectedChild={selectedChild} /></TabsContent>
+        <TabsContent value="fees"><FeeStatus selectedChild={selectedChild} /></TabsContent>
+        <TabsContent value="messages"><Communication /></TabsContent>
+      </Tabs>
     </div>
   );
 }
