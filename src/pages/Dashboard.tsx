@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { GraduationCap, Users, CreditCard, CalendarDays, TrendingUp, AlertCircle } from "lucide-react";
+import { GraduationCap, Users, CreditCard, CalendarDays, TrendingUp, AlertCircle, ClipboardCheck } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { useAuth, UserRole } from "@/lib/auth-context";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
@@ -194,15 +194,12 @@ function ParentDashboard() {
   );
 }
 
-import { ClipboardCheck } from "lucide-react";
-
 export default function Dashboard() {
   const { user } = useAuth();
   if (!user) return null;
 
   const dashboards: Record<UserRole, JSX.Element> = {
-    super_admin: <AdminDashboard />,
-    school_admin: <AdminDashboard />,
+    admin: <AdminDashboard />,
     teacher: <TeacherDashboard />,
     student: <StudentDashboard />,
     parent: <ParentDashboard />,

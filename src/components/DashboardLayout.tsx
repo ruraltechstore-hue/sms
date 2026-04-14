@@ -5,7 +5,7 @@ import {
   MessageSquare, Building2, ClipboardCheck, UserCog, BookOpen,
   LogOut, ChevronLeft, Menu,
 } from "lucide-react";
-import { useAuth, UserRole, ROLE_LABELS } from "@/lib/auth-context";
+import { useAuth, UserRole, ROLE_LABELS, ROLE_DASHBOARD } from "@/lib/auth-context";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -18,48 +18,29 @@ interface NavItem {
 }
 
 const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
-  super_admin: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-    { icon: Building2, label: "Schools", href: "/dashboard/schools" },
-    { icon: Users, label: "All Users", href: "/dashboard/users" },
-    { icon: CreditCard, label: "Finance", href: "/dashboard/finance" },
-    { icon: ClipboardCheck, label: "Reports", href: "/dashboard/reports" },
-    { icon: UserCog, label: "Settings", href: "/dashboard/settings" },
-  ],
-  school_admin: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-    { icon: GraduationCap, label: "Students", href: "/dashboard/students" },
-    { icon: Users, label: "Staff", href: "/dashboard/staff" },
-    { icon: CalendarDays, label: "Attendance", href: "/dashboard/attendance" },
-    { icon: CreditCard, label: "Fees", href: "/dashboard/fees" },
-    { icon: ClipboardCheck, label: "Exams", href: "/dashboard/exams" },
-    { icon: MessageSquare, label: "Messages", href: "/dashboard/messages" },
-    { icon: Building2, label: "ERP", href: "/dashboard/erp" },
-    { icon: UserCog, label: "Settings", href: "/dashboard/settings" },
+  admin: [
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
+    { icon: GraduationCap, label: "Admissions", href: "/admissions" },
+    { icon: CalendarDays, label: "Attendance", href: "/attendance" },
+    { icon: CreditCard, label: "Fees", href: "/fees" },
+    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
+    { icon: ClipboardCheck, label: "Exams", href: "/exams" },
+    { icon: Users, label: "Staff", href: "/staff" },
+    { icon: BookOpen, label: "Parent Portal", href: "/parent-portal" },
   ],
   teacher: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-    { icon: Users, label: "My Classes", href: "/dashboard/classes" },
-    { icon: CalendarDays, label: "Attendance", href: "/dashboard/attendance" },
-    { icon: ClipboardCheck, label: "Exams", href: "/dashboard/exams" },
-    { icon: CalendarDays, label: "Timetable", href: "/dashboard/timetable" },
-    { icon: MessageSquare, label: "Messages", href: "/dashboard/messages" },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/teacher" },
+    { icon: CalendarDays, label: "Attendance", href: "/attendance" },
+    { icon: ClipboardCheck, label: "Exams", href: "/exams" },
   ],
   student: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-    { icon: CalendarDays, label: "Attendance", href: "/dashboard/attendance" },
-    { icon: ClipboardCheck, label: "Results", href: "/dashboard/results" },
-    { icon: CreditCard, label: "Fees", href: "/dashboard/fees" },
-    { icon: CalendarDays, label: "Timetable", href: "/dashboard/timetable" },
-    { icon: BookOpen, label: "Library", href: "/dashboard/library" },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/student" },
+    { icon: ClipboardCheck, label: "Exams", href: "/exams" },
+    { icon: CalendarDays, label: "Attendance", href: "/attendance" },
   ],
   parent: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-    { icon: GraduationCap, label: "My Children", href: "/dashboard/children" },
-    { icon: CalendarDays, label: "Attendance", href: "/dashboard/attendance" },
-    { icon: ClipboardCheck, label: "Results", href: "/dashboard/results" },
-    { icon: CreditCard, label: "Fees", href: "/dashboard/fees" },
-    { icon: MessageSquare, label: "Messages", href: "/dashboard/messages" },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/parent" },
+    { icon: BookOpen, label: "Parent Portal", href: "/parent-portal" },
   ],
 };
 
@@ -79,7 +60,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
-      {/* Logo */}
       <div className="flex items-center gap-2 px-4 h-16 border-b">
         <div className="h-8 w-8 rounded-lg bg-gradient-primary flex items-center justify-center shrink-0">
           <GraduationCap className="h-4 w-4 text-primary-foreground" />
@@ -87,7 +67,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         {!collapsed && <span className="font-heading font-bold">EduVerse</span>}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const active = location.pathname === item.href;
@@ -110,7 +89,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         })}
       </nav>
 
-      {/* User */}
       <div className="border-t p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="h-9 w-9 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0">
@@ -138,12 +116,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed lg:sticky top-0 z-50 h-screen border-r bg-card transition-all duration-300",
@@ -154,7 +130,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <SidebarContent />
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-30 h-16 border-b bg-card/80 backdrop-blur-lg flex items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-2">
@@ -168,7 +143,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               {navItems.find((n) => n.href === location.pathname)?.label || "Dashboard"}
             </h1>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground hidden sm:block">{user.name}</span>
+            <ThemeToggle />
+          </div>
         </header>
 
         <main className="flex-1 p-4 lg:p-6">
