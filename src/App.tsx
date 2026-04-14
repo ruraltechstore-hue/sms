@@ -1,36 +1,36 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/lib/auth-context";
+import { AuthProvider, useAuth, ROLE_DASHBOARD } from "@/lib/auth-context";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import Admissions from "./pages/Admissions";
+import Attendance from "./pages/Attendance";
+import Fees from "./pages/Fees";
+import Messaging from "./pages/Messaging";
+import Exams from "./pages/Exams";
+import Staff from "./pages/Staff";
+import ParentPortal from "./pages/ParentPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-function DashboardPage() {
-  return (
-    <DashboardLayout>
-      <Dashboard />
-    </DashboardLayout>
-  );
+function DashboardRedirect() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  return <Navigate to={ROLE_DASHBOARD[user.role]} replace />;
 }
 
-function PlaceholderModule({ title }: { title: string }) {
+function WrappedPage({ children }: { children: React.ReactNode }) {
   return (
-    <DashboardLayout>
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="text-center">
-          <h2 className="text-2xl font-heading font-bold mb-2">{title}</h2>
-          <p className="text-muted-foreground">This module is coming soon.</p>
-        </div>
-      </div>
-    </DashboardLayout>
+    <ProtectedRoute>
+      <DashboardLayout>{children}</DashboardLayout>
+    </ProtectedRoute>
   );
 }
 
@@ -44,25 +44,18 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/dashboard/students" element={<PlaceholderModule title="Student Management" />} />
-            <Route path="/dashboard/staff" element={<PlaceholderModule title="Staff & HR" />} />
-            <Route path="/dashboard/attendance" element={<PlaceholderModule title="Attendance" />} />
-            <Route path="/dashboard/fees" element={<PlaceholderModule title="Fee Management" />} />
-            <Route path="/dashboard/exams" element={<PlaceholderModule title="Examinations" />} />
-            <Route path="/dashboard/messages" element={<PlaceholderModule title="Messaging" />} />
-            <Route path="/dashboard/erp" element={<PlaceholderModule title="School ERP" />} />
-            <Route path="/dashboard/settings" element={<PlaceholderModule title="Settings" />} />
-            <Route path="/dashboard/schools" element={<PlaceholderModule title="Schools" />} />
-            <Route path="/dashboard/users" element={<PlaceholderModule title="User Management" />} />
-            <Route path="/dashboard/finance" element={<PlaceholderModule title="Finance" />} />
-            <Route path="/dashboard/reports" element={<PlaceholderModule title="Reports" />} />
-            <Route path="/dashboard/classes" element={<PlaceholderModule title="My Classes" />} />
-            <Route path="/dashboard/timetable" element={<PlaceholderModule title="Timetable" />} />
-            <Route path="/dashboard/results" element={<PlaceholderModule title="Results" />} />
-            <Route path="/dashboard/library" element={<PlaceholderModule title="Library" />} />
-            <Route path="/dashboard/children" element={<PlaceholderModule title="My Children" />} />
+            <Route path="/dashboard" element={<DashboardRedirect />} />
+            <Route path="/dashboard/admin" element={<WrappedPage><Dashboard /></WrappedPage>} />
+            <Route path="/dashboard/teacher" element={<WrappedPage><Dashboard /></WrappedPage>} />
+            <Route path="/dashboard/student" element={<WrappedPage><Dashboard /></WrappedPage>} />
+            <Route path="/dashboard/parent" element={<WrappedPage><Dashboard /></WrappedPage>} />
+            <Route path="/admissions" element={<WrappedPage><Admissions /></WrappedPage>} />
+            <Route path="/attendance" element={<WrappedPage><Attendance /></WrappedPage>} />
+            <Route path="/fees" element={<WrappedPage><Fees /></WrappedPage>} />
+            <Route path="/messaging" element={<WrappedPage><Messaging /></WrappedPage>} />
+            <Route path="/exams" element={<WrappedPage><Exams /></WrappedPage>} />
+            <Route path="/staff" element={<WrappedPage><Staff /></WrappedPage>} />
+            <Route path="/parent-portal" element={<WrappedPage><ParentPortal /></WrappedPage>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

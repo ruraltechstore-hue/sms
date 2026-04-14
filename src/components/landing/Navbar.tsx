@@ -16,17 +16,13 @@ export function Navbar() {
 
         <nav className="hidden md:flex items-center gap-8">
           <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
-          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About</a>
+          <a href="#testimonials" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Testimonials</a>
         </nav>
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/login">Log In</Link>
-          </Button>
           <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground">
-            <Link to="/register">Get Started</Link>
+            <Link to="/login">Log In</Link>
           </Button>
         </div>
       </div>
