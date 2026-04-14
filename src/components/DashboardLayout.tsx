@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   GraduationCap, LayoutDashboard, Users, CalendarDays, CreditCard,
   MessageSquare, Building2, ClipboardCheck, UserCog, BookOpen,
-  LogOut, ChevronLeft, Menu,
+  LogOut, ChevronLeft, Menu, Settings,
 } from "lucide-react";
 import { useAuth, UserRole, ROLE_LABELS, ROLE_DASHBOARD } from "@/lib/auth-context";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -27,6 +27,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { icon: ClipboardCheck, label: "Exams", href: "/exams" },
     { icon: Users, label: "Staff", href: "/staff" },
     { icon: BookOpen, label: "Parent Portal", href: "/parent-portal" },
+    { icon: Settings, label: "Settings", href: "/settings" },
   ],
   teacher: [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/teacher" },

@@ -16,6 +16,7 @@ import Messaging from "./pages/Messaging";
 import Exams from "./pages/Exams";
 import Staff from "./pages/Staff";
 import ParentPortal from "./pages/ParentPortal";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/exams" element={<WrappedPage><Exams /></WrappedPage>} />
             <Route path="/staff" element={<WrappedPage><Staff /></WrappedPage>} />
             <Route path="/parent-portal" element={<WrappedPage><ParentPortal /></WrappedPage>} />
+            <Route path="/settings" element={<WrappedPage><Settings /></WrappedPage>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
