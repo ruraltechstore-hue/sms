@@ -1,6 +1,11 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { CalendarDays, CheckCircle, XCircle, Clock } from "lucide-react";
+import { CalendarDays, CheckCircle, XCircle, Clock, ClipboardCheck, BarChart3, CalendarRange } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AttendanceMarking } from "@/components/attendance/AttendanceMarking";
+import { AttendanceCalendar } from "@/components/attendance/AttendanceCalendar";
+import { AttendanceCharts } from "@/components/attendance/AttendanceCharts";
 
 export default function Attendance() {
   return (
@@ -23,29 +28,31 @@ export default function Attendance() {
         ))}
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="rounded-2xl border bg-card p-6">
-        <h3 className="font-heading font-semibold mb-4">Today's Attendance by Class</h3>
-        <div className="space-y-3">
-          {[
-            { class: "Class 10-A", present: 42, absent: 3, total: 45 },
-            { class: "Class 10-B", present: 40, absent: 4, total: 44 },
-            { class: "Class 9-A", present: 38, absent: 2, total: 40 },
-            { class: "Class 9-B", present: 41, absent: 1, total: 42 },
-            { class: "Class 8-A", present: 39, absent: 3, total: 42 },
-          ].map((row, i) => (
-            <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
-              <span className="font-medium text-sm">{row.class}</span>
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-success">{row.present} Present</span>
-                <span className="text-destructive">{row.absent} Absent</span>
-                <div className="w-24 h-2 rounded-full bg-secondary overflow-hidden">
-                  <div className="h-full rounded-full bg-success" style={{ width: `${(row.present / row.total) * 100}%` }} />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </motion.div>
+      <Tabs defaultValue="marking" className="space-y-4">
+        <TabsList className="bg-secondary/50">
+          <TabsTrigger value="marking" className="gap-2"><ClipboardCheck className="h-4 w-4" /> Mark Attendance</TabsTrigger>
+          <TabsTrigger value="calendar" className="gap-2"><CalendarRange className="h-4 w-4" /> Calendar</TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-2"><BarChart3 className="h-4 w-4" /> Analytics</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="marking">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <AttendanceMarking />
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="calendar">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border bg-card p-6">
+            <AttendanceCalendar />
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <AttendanceCharts />
+          </motion.div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
