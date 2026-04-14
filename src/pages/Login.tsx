@@ -5,23 +5,37 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth, UserRole, ROLE_LABELS } from "@/lib/auth-context";
+import { useAuth, ROLE_DASHBOARD } from "@/lib/auth-context";
 import { ThemeToggle } from "@/components/ThemeToggle";
-
-const ROLES: UserRole[] = ["super_admin", "school_admin", "teacher", "student", "parent"];
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("school_admin");
   const [showPass, setShowPass] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    login(email, password, role);
-    navigate("/dashboard");
+    const success = login(email, password);
+    if (success) {
+      // We need to get the role from the email to redirect
+      const roleMap: Record<string, string> = {
+        "admin@school.com": "/dashboard/admin",
+        "teacher@school.com": "/dashboard/teacher",
+        "student@school.com": "/dashboard/student",
+        "parent@school.com": "/dashboard/parent",
+      };
+      navigate(roleMap[email.toLowerCase()] || "/dashboard/admin");
+    } else {
+      toast({
+        title: "Login Failed",
+        description: "Invalid email. Try admin@school.com, teacher@school.com, student@school.com, or parent@school.com",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -33,6 +47,15 @@ const Login = () => {
           <GraduationCap className="h-16 w-16 mb-8" />
           <h1 className="text-4xl font-heading font-bold mb-4">Welcome back to EduVerse</h1>
           <p className="text-primary-foreground/80 text-lg">Manage your institution with the most powerful school management platform.</p>
+          <div className="mt-8 p-4 rounded-xl bg-primary-foreground/10 backdrop-blur-sm">
+            <p className="text-sm font-medium mb-2">Demo Accounts:</p>
+            <div className="space-y-1 text-xs text-primary-foreground/80">
+              <p>admin@school.com → Admin</p>
+              <p>teacher@school.com → Teacher</p>
+              <p>student@school.com → Student</p>
+              <p>parent@school.com → Parent</p>
+            </div>
+          </div>
         </motion.div>
       </div>
 
@@ -48,24 +71,7 @@ const Login = () => {
           </Link>
 
           <h2 className="text-2xl font-heading font-bold mb-2">Sign in</h2>
-          <p className="text-muted-foreground mb-8">Select your role and enter credentials</p>
-
-          {/* Role selector */}
-          <div className="grid grid-cols-3 gap-2 mb-6">
-            {ROLES.map((r) => (
-              <button
-                key={r}
-                onClick={() => setRole(r)}
-                className={`px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
-                  role === r
-                    ? "bg-primary text-primary-foreground border-primary shadow-glow"
-                    : "bg-secondary text-secondary-foreground border-border hover:border-primary/50"
-                }`}
-              >
-                {ROLE_LABELS[r]}
-              </button>
-            ))}
-          </div>
+          <p className="text-muted-foreground mb-8">Enter your credentials to access the portal</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -82,13 +88,18 @@ const Login = () => {
               </div>
             </div>
             <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground">
-              Sign In as {ROLE_LABELS[role]}
+              Sign In
             </Button>
           </form>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            Don't have an account? <Link to="/register" className="text-primary font-medium hover:underline">Sign up</Link>
-          </p>
+          {/* Demo credentials for mobile */}
+          <div className="lg:hidden mt-6 p-4 rounded-xl border bg-card">
+            <p className="text-sm font-medium mb-2">Demo Accounts:</p>
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p>admin@school.com • teacher@school.com</p>
+              <p>student@school.com • parent@school.com</p>
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>
