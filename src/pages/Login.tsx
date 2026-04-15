@@ -89,6 +89,12 @@ const Login = () => {
               {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Signing in...</> : "Sign In"}
             </Button>
           </form>
+
+          <div className="mt-4 text-center">
+            <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              Forgot your password?
+            </Link>
+          </div>
         </motion.div>
       </div>
     </div>
