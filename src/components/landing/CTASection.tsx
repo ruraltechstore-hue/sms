@@ -19,11 +19,11 @@ export function CTASection() {
               Ready to Transform Your School?
             </h2>
             <p className="text-primary-foreground/80 text-lg mb-8 max-w-xl mx-auto">
-              Join hundreds of institutions already using our platform for seamless management.
+              Streamline your institution's management with a powerful, all-in-one platform.
             </p>
             <Button asChild size="lg" variant="secondary" className="text-base px-8">
-              <Link to="/register">
-                Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
+              <Link to="/login">
+                Get Started <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
