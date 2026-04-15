@@ -1,8 +1,11 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { EXAMS } from "@/lib/mock-exams";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Clock, MapPin } from "lucide-react";
-import { useState } from "react";
+import { examService } from "@/lib/services/examService";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingState } from "@/components/LoadingState";
+import type { Exam } from "@/lib/types";
 
 const statusStyles: Record<string, string> = {
   ongoing: "bg-success/10 text-success",
@@ -12,22 +15,32 @@ const statusStyles: Record<string, string> = {
 };
 
 export function ExamSchedule() {
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await examService.getAll();
+      setExams(data);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  if (loading) return <LoadingState rows={4} />;
+
+  if (exams.length === 0) {
+    return <EmptyState title="No Exams Scheduled" description="Exam schedules will appear here once connected to the backend." />;
+  }
 
   return (
     <div className="space-y-4">
-      {EXAMS.map((exam, i) => (
-        <motion.div
-          key={exam.id}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.08 }}
-          className="rounded-2xl border bg-card overflow-hidden"
-        >
-          <div
-            onClick={() => setExpanded(expanded === exam.id ? null : exam.id)}
-            className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-secondary/30 transition-colors"
-          >
+      {exams.map((exam, i) => (
+        <motion.div key={exam.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+          className="rounded-2xl border bg-card overflow-hidden">
+          <div onClick={() => setExpanded(expanded === exam.id ? null : exam.id)}
+            className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-secondary/30 transition-colors">
             <div>
               <div className="flex items-center gap-2">
                 <h4 className="font-semibold">{exam.name}</h4>
@@ -39,9 +52,7 @@ export function ExamSchedule() {
                 <span>{exam.subjects.length} subjects</span>
               </div>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${statusStyles[exam.status]}`}>
-              {exam.status}
-            </span>
+            <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${statusStyles[exam.status]}`}>{exam.status}</span>
           </div>
 
           {expanded === exam.id && (

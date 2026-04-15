@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, XCircle, Clock, AlertCircle, Search, Save, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CLASSES, generateClassStudents, type StudentAttendance } from "@/lib/mock-attendance";
+import { attendanceService } from "@/lib/services/attendanceService";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingState } from "@/components/LoadingState";
+import type { StudentAttendance } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const statusConfig = {
@@ -17,13 +20,33 @@ const statusConfig = {
 };
 
 export function AttendanceMarking() {
-  const [selectedClass, setSelectedClass] = useState(CLASSES[0]);
-  const [students, setStudents] = useState<StudentAttendance[]>(() => generateClassStudents(CLASSES[0]));
+  const [classes, setClasses] = useState<string[]>([]);
+  const [selectedClass, setSelectedClass] = useState("");
+  const [students, setStudents] = useState<StudentAttendance[]>([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      const data = await attendanceService.getClasses();
+      setClasses(data);
+      if (data.length > 0) setSelectedClass(data[0]);
+      setLoading(false);
+    };
+    fetchClasses();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedClass) return;
+    const fetchStudents = async () => {
+      const data = await attendanceService.getClassStudents(selectedClass);
+      setStudents(data);
+    };
+    fetchStudents();
+  }, [selectedClass]);
 
   const handleClassChange = (cls: string) => {
     setSelectedClass(cls);
-    setStudents(generateClassStudents(cls));
     setSearch("");
   };
 
@@ -47,22 +70,26 @@ export function AttendanceMarking() {
     return counts;
   }, [students]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    await attendanceService.saveAttendance(selectedClass, students);
     toast.success(`Attendance saved for ${selectedClass}`, {
       description: `${stats.present} present, ${stats.absent} absent, ${stats.late} late, ${stats.excused} excused`,
     });
   };
 
+  if (loading) return <LoadingState type="spinner" />;
+
+  if (classes.length === 0) {
+    return <EmptyState title="No Classes Available" description="Classes will appear here once connected to the backend." />;
+  }
+
   return (
     <div className="space-y-4">
-      {/* Controls */}
       <div className="flex flex-wrap items-center gap-3">
         <Select value={selectedClass} onValueChange={handleClassChange}>
-          <SelectTrigger className="w-44">
-            <SelectValue />
-          </SelectTrigger>
+          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
-            {CLASSES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            {classes.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
           </SelectContent>
         </Select>
         <div className="relative flex-1 min-w-[200px] max-w-sm">
@@ -76,13 +103,9 @@ export function AttendanceMarking() {
           <Button variant="outline" size="sm" onClick={() => markAll("absent")}>
             <XCircle className="h-4 w-4 mr-1 text-destructive" /> All Absent
           </Button>
-          <Button variant="outline" size="sm" onClick={() => handleClassChange(selectedClass)}>
-            <RotateCcw className="h-4 w-4 mr-1" /> Reset
-          </Button>
         </div>
       </div>
 
-      {/* Live Stats */}
       <div className="flex gap-3 flex-wrap">
         {(Object.keys(statusConfig) as Array<keyof typeof statusConfig>).map(key => {
           const cfg = statusConfig[key];
@@ -98,51 +121,41 @@ export function AttendanceMarking() {
         </Badge>
       </div>
 
-      {/* Student Grid */}
-      <div className="rounded-xl border bg-card overflow-hidden">
-        <div className="grid grid-cols-[auto_1fr_auto] gap-0 text-sm">
-          <div className="contents font-medium text-muted-foreground bg-secondary/50 text-xs uppercase tracking-wider">
-            <div className="p-3 border-b">Roll</div>
-            <div className="p-3 border-b">Student Name</div>
-            <div className="p-3 border-b text-center">Status</div>
+      {students.length === 0 ? (
+        <EmptyState title="No Students" description="Student data for this class will appear here." />
+      ) : (
+        <div className="rounded-xl border bg-card overflow-hidden">
+          <div className="grid grid-cols-[auto_1fr_auto] gap-0 text-sm">
+            <div className="contents font-medium text-muted-foreground bg-secondary/50 text-xs uppercase tracking-wider">
+              <div className="p-3 border-b">Roll</div>
+              <div className="p-3 border-b">Student Name</div>
+              <div className="p-3 border-b text-center">Status</div>
+            </div>
+            {filtered.map((student, i) => (
+              <motion.div key={student.id} className="contents" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.01 }}>
+                <div className="p-3 border-b border-border/50 text-muted-foreground font-mono text-xs flex items-center">{student.rollNo}</div>
+                <div className="p-3 border-b border-border/50 font-medium flex items-center">{student.name}</div>
+                <div className="p-3 border-b border-border/50 flex items-center justify-center gap-1">
+                  {(Object.keys(statusConfig) as Array<keyof typeof statusConfig>).map(status => {
+                    const cfg = statusConfig[status];
+                    const active = student.status === status;
+                    return (
+                      <button key={status} onClick={() => toggleStatus(student.id, status)}
+                        className={cn("p-1.5 rounded-lg transition-all", active ? cfg.bg + " border shadow-sm scale-110" : "hover:bg-secondary/80 opacity-40 hover:opacity-70")}
+                        title={cfg.label}>
+                        <cfg.icon className={cn("h-4 w-4", active ? cfg.color : "text-muted-foreground")} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ))}
           </div>
-          {filtered.map((student, i) => (
-            <motion.div
-              key={student.id}
-              className="contents"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: i * 0.01 }}
-            >
-              <div className="p-3 border-b border-border/50 text-muted-foreground font-mono text-xs flex items-center">{student.rollNo}</div>
-              <div className="p-3 border-b border-border/50 font-medium flex items-center">{student.name}</div>
-              <div className="p-3 border-b border-border/50 flex items-center justify-center gap-1">
-                {(Object.keys(statusConfig) as Array<keyof typeof statusConfig>).map(status => {
-                  const cfg = statusConfig[status];
-                  const active = student.status === status;
-                  return (
-                    <button
-                      key={status}
-                      onClick={() => toggleStatus(student.id, status)}
-                      className={cn(
-                        "p-1.5 rounded-lg transition-all",
-                        active ? cfg.bg + " border shadow-sm scale-110" : "hover:bg-secondary/80 opacity-40 hover:opacity-70"
-                      )}
-                      title={cfg.label}
-                    >
-                      <cfg.icon className={cn("h-4 w-4", active ? cfg.color : "text-muted-foreground")} />
-                    </button>
-                  );
-                })}
-              </div>
-            </motion.div>
-          ))}
         </div>
-      </div>
+      )}
 
-      {/* Save Button */}
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="gap-2">
+        <Button onClick={handleSave} className="gap-2" disabled={students.length === 0}>
           <Save className="h-4 w-4" /> Save Attendance
         </Button>
       </div>

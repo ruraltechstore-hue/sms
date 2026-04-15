@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Download, Eye } from "lucide-react";
+import { Search, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FEE_PAYMENTS, FeePayment } from "@/lib/mock-fees";
+import { feeService } from "@/lib/services/feeService";
 import { FeeReceipt } from "./FeeReceipt";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingState } from "@/components/LoadingState";
+import type { FeePayment } from "@/lib/types";
 
 const statusStyles: Record<string, string> = {
   paid: "bg-success/10 text-success",
@@ -17,15 +20,28 @@ const statusStyles: Record<string, string> = {
 };
 
 export function PaymentTracker() {
+  const [payments, setPayments] = useState<FeePayment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedPayment, setSelectedPayment] = useState<FeePayment | null>(null);
 
-  const filtered = FEE_PAYMENTS.filter((p) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await feeService.getAll();
+      setPayments(data);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const filtered = payments.filter((p) => {
     const matchesSearch = p.studentName.toLowerCase().includes(search.toLowerCase()) || p.receiptNo?.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  if (loading) return <div className="rounded-2xl border bg-card p-6"><LoadingState rows={6} /></div>;
 
   return (
     <>
@@ -47,47 +63,50 @@ export function PaymentTracker() {
           </Select>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-left text-muted-foreground">
-                <th className="pb-3 font-medium">Student</th>
-                <th className="pb-3 font-medium">Class</th>
-                <th className="pb-3 font-medium">Fee Type</th>
-                <th className="pb-3 font-medium">Amount</th>
-                <th className="pb-3 font-medium">Paid</th>
-                <th className="pb-3 font-medium">Status</th>
-                <th className="pb-3 font-medium">Date</th>
-                <th className="pb-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {filtered.map((p) => (
-                <tr key={p.id} className="hover:bg-secondary/50 transition-colors">
-                  <td className="py-3 font-medium">{p.studentName}</td>
-                  <td className="py-3 text-muted-foreground">{p.class}-{p.section}</td>
-                  <td className="py-3">{p.feeType}</td>
-                  <td className="py-3">₹{p.amount.toLocaleString("en-IN")}</td>
-                  <td className="py-3 font-semibold">₹{p.paidAmount.toLocaleString("en-IN")}</td>
-                  <td className="py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusStyles[p.status]}`}>{p.status}</span>
-                  </td>
-                  <td className="py-3 text-muted-foreground">{p.paidDate || "—"}</td>
-                  <td className="py-3">
-                    {p.status === "paid" || p.status === "partial" ? (
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedPayment(p)}>
-                        <Eye className="h-4 w-4 mr-1" /> Receipt
-                      </Button>
-                    ) : (
-                      <Badge variant="outline" className="text-xs">Unpaid</Badge>
-                    )}
-                  </td>
+        {filtered.length === 0 ? (
+          <EmptyState title="No Payments Found" description={payments.length === 0 ? "Payment data will appear here once connected to the backend." : "No payments match your filters."} />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="pb-3 font-medium">Student</th>
+                  <th className="pb-3 font-medium">Class</th>
+                  <th className="pb-3 font-medium">Fee Type</th>
+                  <th className="pb-3 font-medium">Amount</th>
+                  <th className="pb-3 font-medium">Paid</th>
+                  <th className="pb-3 font-medium">Status</th>
+                  <th className="pb-3 font-medium">Date</th>
+                  <th className="pb-3 font-medium">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">No payments found.</p>}
+              </thead>
+              <tbody className="divide-y">
+                {filtered.map((p) => (
+                  <tr key={p.id} className="hover:bg-secondary/50 transition-colors">
+                    <td className="py-3 font-medium">{p.studentName}</td>
+                    <td className="py-3 text-muted-foreground">{p.class}-{p.section}</td>
+                    <td className="py-3">{p.feeType}</td>
+                    <td className="py-3">₹{p.amount.toLocaleString("en-IN")}</td>
+                    <td className="py-3 font-semibold">₹{p.paidAmount.toLocaleString("en-IN")}</td>
+                    <td className="py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusStyles[p.status]}`}>{p.status}</span>
+                    </td>
+                    <td className="py-3 text-muted-foreground">{p.paidDate || "—"}</td>
+                    <td className="py-3">
+                      {p.status === "paid" || p.status === "partial" ? (
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedPayment(p)}>
+                          <Eye className="h-4 w-4 mr-1" /> Receipt
+                        </Button>
+                      ) : (
+                        <Badge variant="outline" className="text-xs">Unpaid</Badge>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </motion.div>
 
       <Dialog open={!!selectedPayment} onOpenChange={() => setSelectedPayment(null)}>

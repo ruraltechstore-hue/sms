@@ -1,4 +1,4 @@
-import { FeePayment } from "@/lib/mock-fees";
+import type { FeePayment } from "@/lib/types";
 import { Separator } from "@/components/ui/separator";
 
 interface FeeReceiptProps {
@@ -9,20 +9,19 @@ export function FeeReceipt({ payment }: FeeReceiptProps) {
   return (
     <div className="bg-card rounded-xl p-6 space-y-4 text-sm">
       <div className="text-center space-y-1">
-        <h3 className="font-heading font-bold text-lg">Vidyalaya School</h3>
-        <p className="text-muted-foreground text-xs">123 Education Lane, Knowledge City</p>
-        <p className="text-muted-foreground text-xs">Phone: +91 98765 43210</p>
+        <h3 className="font-heading font-bold text-lg">School ERP</h3>
+        <p className="text-muted-foreground text-xs">Fee Payment Receipt</p>
       </div>
 
       <Separator />
 
       <div className="flex justify-between">
         <span className="text-muted-foreground">Receipt No.</span>
-        <span className="font-semibold">{payment.receiptNo}</span>
+        <span className="font-semibold">{payment.receiptNo || "—"}</span>
       </div>
       <div className="flex justify-between">
         <span className="text-muted-foreground">Date</span>
-        <span>{payment.paidDate}</span>
+        <span>{payment.paidDate || "—"}</span>
       </div>
 
       <Separator />
@@ -63,10 +62,12 @@ export function FeeReceipt({ payment }: FeeReceiptProps) {
             <span>₹{(payment.amount - payment.paidAmount).toLocaleString("en-IN")}</span>
           </div>
         )}
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Payment Method</span>
-          <span className="capitalize">{payment.method}</span>
-        </div>
+        {payment.method && (
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Payment Method</span>
+            <span className="capitalize">{payment.method}</span>
+          </div>
+        )}
       </div>
 
       <Separator />

@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Mail, Phone } from "lucide-react";
+import { Search, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MOCK_STAFF, StaffMember, DEPARTMENTS } from "@/lib/mock-staff";
+import { staffService } from "@/lib/services/staffService";
 import { StaffProfile } from "./StaffProfile";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingState } from "@/components/LoadingState";
+import type { StaffMember, Department } from "@/lib/types";
 
 const statusStyles: Record<string, string> = {
   active: "bg-success/10 text-success",
@@ -15,17 +17,30 @@ const statusStyles: Record<string, string> = {
 };
 
 export function StaffDirectory() {
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
 
-  const filtered = MOCK_STAFF.filter((s) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      const [s, d] = await Promise.all([staffService.getAll(), staffService.getDepartments()]);
+      setStaff(s); setDepartments(d); setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  const filtered = staff.filter((s) => {
     const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) || s.email.toLowerCase().includes(search.toLowerCase());
     const matchesDept = deptFilter === "all" || s.department === deptFilter;
     const matchesType = typeFilter === "all" || s.type === typeFilter;
     return matchesSearch && matchesDept && matchesType;
   });
+
+  if (loading) return <div className="rounded-2xl border bg-card p-6"><LoadingState rows={6} /></div>;
 
   return (
     <>
@@ -39,9 +54,7 @@ export function StaffDirectory() {
             <SelectTrigger className="w-[180px]"><SelectValue placeholder="Department" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Departments</SelectItem>
-              {DEPARTMENTS.map((d) => (
-                <SelectItem key={d.name} value={d.name}>{d.name}</SelectItem>
-              ))}
+              {departments.map((d) => <SelectItem key={d.name} value={d.name}>{d.name}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -54,40 +67,34 @@ export function StaffDirectory() {
           </Select>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((staff, i) => (
-            <motion.div
-              key={staff.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03 }}
-              onClick={() => setSelectedStaff(staff)}
-              className="rounded-xl border bg-card p-4 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer"
-            >
-              <div className="flex items-start gap-3">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
-                  {staff.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="font-semibold truncate">{staff.name}</h4>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium capitalize whitespace-nowrap ${statusStyles[staff.status]}`}>
-                      {staff.status.replace("-", " ")}
-                    </span>
+        {filtered.length === 0 ? (
+          <EmptyState title="No Staff Found" description={staff.length === 0 ? "Staff data will appear here once connected to the backend." : "No staff match your filters."} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {filtered.map((s, i) => (
+              <motion.div key={s.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+                onClick={() => setSelectedStaff(s)} className="rounded-xl border bg-card p-4 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
+                    {s.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                   </div>
-                  <p className="text-sm text-muted-foreground">{staff.designation}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{staff.department}</p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{staff.email}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="font-semibold truncate">{s.name}</h4>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium capitalize whitespace-nowrap ${statusStyles[s.status]}`}>{s.status.replace("-", " ")}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{s.designation}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{s.department}</p>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{s.email}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-        {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">No staff found.</p>}
+              </motion.div>
+            ))}
+          </div>
+        )}
       </motion.div>
-
       <Dialog open={!!selectedStaff} onOpenChange={() => setSelectedStaff(null)}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Staff Profile</DialogTitle></DialogHeader>

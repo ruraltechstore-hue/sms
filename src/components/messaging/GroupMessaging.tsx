@@ -1,14 +1,18 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GROUP_CHATS, GroupChat, ChatMessage } from "@/lib/mock-messaging";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Search, ArrowLeft, Users } from "lucide-react";
+import { messagingService } from "@/lib/services/messagingService";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingState } from "@/components/LoadingState";
+import type { GroupChat, ChatMessage } from "@/lib/types";
 
 export function GroupMessaging() {
-  const [chats] = useState(GROUP_CHATS);
+  const [chats, setChats] = useState<GroupChat[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeChat, setActiveChat] = useState<GroupChat | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -16,12 +20,12 @@ export function GroupMessaging() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (activeChat) setMessages(activeChat.messages);
-  }, [activeChat]);
+    const fetchData = async () => { const d = await messagingService.getGroupChats(); setChats(d); setLoading(false); };
+    fetchData();
+  }, []);
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+  useEffect(() => { if (activeChat) setMessages(activeChat.messages); }, [activeChat]);
+  useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [messages]);
 
   const handleSend = () => {
     if (!newMessage.trim()) return;
@@ -31,10 +35,11 @@ export function GroupMessaging() {
 
   const filtered = chats.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
 
+  if (loading) return <div className="rounded-2xl border bg-card p-6"><LoadingState rows={5} /></div>;
+
   return (
     <div className="rounded-2xl border bg-card overflow-hidden" style={{ height: "520px" }}>
       <div className="flex h-full">
-        {/* Chat List */}
         <div className={`w-full md:w-80 border-r flex flex-col ${activeChat ? "hidden md:flex" : "flex"}`}>
           <div className="p-3 border-b">
             <div className="relative">
@@ -43,48 +48,30 @@ export function GroupMessaging() {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {filtered.map((chat, i) => (
-              <motion.div
-                key={chat.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.05 }}
-                onClick={() => setActiveChat(chat)}
-                className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-secondary/50 transition-colors border-b border-border/50 ${activeChat?.id === chat.id ? "bg-secondary/70" : ""}`}
-              >
-                <Avatar className="h-10 w-10 shrink-0">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{chat.avatar}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-sm truncate">{chat.name}</h4>
-                    <span className="text-[10px] text-muted-foreground">{chat.lastMessageTime}</span>
+            {filtered.length === 0 ? (
+              <div className="p-6"><EmptyState title="No Groups" description="Group chats will appear here." /></div>
+            ) : (
+              filtered.map((chat, i) => (
+                <motion.div key={chat.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.05 }}
+                  onClick={() => setActiveChat(chat)} className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-secondary/50 transition-colors border-b border-border/50 ${activeChat?.id === chat.id ? "bg-secondary/70" : ""}`}>
+                  <Avatar className="h-10 w-10 shrink-0"><AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{chat.avatar}</AvatarFallback></Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between"><h4 className="font-semibold text-sm truncate">{chat.name}</h4><span className="text-[10px] text-muted-foreground">{chat.lastMessageTime}</span></div>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{chat.lastMessage}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">{chat.lastMessage}</p>
-                </div>
-                {chat.unread > 0 && (
-                  <Badge className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]">{chat.unread}</Badge>
-                )}
-              </motion.div>
-            ))}
+                  {chat.unread > 0 && <Badge className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px]">{chat.unread}</Badge>}
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
-
-        {/* Chat Area */}
         <div className={`flex-1 flex flex-col ${!activeChat ? "hidden md:flex" : "flex"}`}>
           {activeChat ? (
             <>
               <div className="p-3 border-b flex items-center gap-3">
-                <Button variant="ghost" size="icon" className="md:hidden h-8 w-8" onClick={() => setActiveChat(null)}>
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{activeChat.avatar}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h4 className="font-semibold text-sm">{activeChat.name}</h4>
-                  <p className="text-[10px] text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> {activeChat.members} members</p>
-                </div>
+                <Button variant="ghost" size="icon" className="md:hidden h-8 w-8" onClick={() => setActiveChat(null)}><ArrowLeft className="h-4 w-4" /></Button>
+                <Avatar className="h-8 w-8"><AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{activeChat.avatar}</AvatarFallback></Avatar>
+                <div><h4 className="font-semibold text-sm">{activeChat.name}</h4><p className="text-[10px] text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> {activeChat.members} members</p></div>
               </div>
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
                 <AnimatePresence>
@@ -100,24 +87,13 @@ export function GroupMessaging() {
                 </AnimatePresence>
               </div>
               <div className="p-3 border-t flex gap-2">
-                <Input
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  className="flex-1"
-                />
-                <Button size="icon" onClick={handleSend} disabled={!newMessage.trim()}>
-                  <Send className="h-4 w-4" />
-                </Button>
+                <Input placeholder="Type a message..." value={newMessage} onChange={(e) => setNewMessage(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSend()} className="flex-1" />
+                <Button size="icon" onClick={handleSend} disabled={!newMessage.trim()}><Send className="h-4 w-4" /></Button>
               </div>
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Select a group to start messaging</p>
-              </div>
+              <div className="text-center"><Users className="h-12 w-12 mx-auto mb-3 opacity-30" /><p className="text-sm">Select a group to start messaging</p></div>
             </div>
           )}
         </div>

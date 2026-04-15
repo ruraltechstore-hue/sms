@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { IndianRupee, AlertTriangle, CheckCircle, CreditCard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,8 +6,19 @@ import { StatCard } from "@/components/StatCard";
 import { FeeStructureTable } from "@/components/fees/FeeStructureTable";
 import { PaymentTracker } from "@/components/fees/PaymentTracker";
 import { FeeAnalytics } from "@/components/fees/FeeAnalytics";
+import { LoadingState } from "@/components/LoadingState";
 
 export default function Fees() {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ totalCollected: "₹0", pendingDues: "₹0", thisMonth: "₹0", paidStudents: "0" });
+
+  useEffect(() => {
+    // TODO: fetch fee stats from API
+    setLoading(false);
+  }, []);
+
+  if (loading) return <LoadingState type="spinner" />;
+
   return (
     <div className="space-y-6">
       <div>
@@ -16,10 +28,10 @@ export default function Fees() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { title: "Total Collected", value: "₹24.5L", change: "+8%", changeType: "positive" as const, icon: IndianRupee, iconColor: "text-success" },
-          { title: "Pending Dues", value: "₹3.2L", icon: AlertTriangle, iconColor: "text-warning" },
-          { title: "This Month", value: "₹4.8L", change: "+12%", changeType: "positive" as const, icon: CreditCard, iconColor: "text-primary" },
-          { title: "Paid Students", value: "2,412", icon: CheckCircle, iconColor: "text-accent" },
+          { title: "Total Collected", value: stats.totalCollected, icon: IndianRupee, iconColor: "text-success" },
+          { title: "Pending Dues", value: stats.pendingDues, icon: AlertTriangle, iconColor: "text-warning" },
+          { title: "This Month", value: stats.thisMonth, icon: CreditCard, iconColor: "text-primary" },
+          { title: "Paid Students", value: stats.paidStudents, icon: CheckCircle, iconColor: "text-accent" },
         ].map((s, i) => (
           <motion.div key={s.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
             <StatCard {...s} />
