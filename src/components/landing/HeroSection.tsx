@@ -57,9 +57,9 @@ export function HeroSection() {
                 </div>
                 <div className="space-y-3">
                   {[
-                    { icon: GraduationCap, label: "Students Enrolled", value: "2,847", color: "text-primary" },
-                    { icon: Shield, label: "Attendance Rate", value: "96.4%", color: "text-success" },
-                    { icon: Zap, label: "Fees Collected", value: "₹24.5L", color: "text-accent" },
+                    { icon: GraduationCap, label: "Students Enrolled", value: "—", color: "text-primary" },
+                    { icon: Shield, label: "Attendance Rate", value: "—", color: "text-success" },
+                    { icon: Zap, label: "Fees Collected", value: "—", color: "text-accent" },
                   ].map((stat, i) => (
                     <motion.div
                       key={stat.label}

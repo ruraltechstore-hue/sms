@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { GraduationCap, Eye, EyeOff } from "lucide-react";
+import { GraduationCap, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,26 +13,31 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const { login } = useAuth();
+  const { login, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(email, password);
+
+    if (!email || !password) {
+      toast({
+        title: "Missing Credentials",
+        description: "Please enter both email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const success = await login(email, password);
     if (success) {
-      // We need to get the role from the email to redirect
-      const roleMap: Record<string, string> = {
-        "admin@school.com": "/dashboard/admin",
-        "teacher@school.com": "/dashboard/teacher",
-        "student@school.com": "/dashboard/student",
-        "parent@school.com": "/dashboard/parent",
-      };
-      navigate(roleMap[email.toLowerCase()] || "/dashboard/admin");
+      // After successful login, the user object will be in context
+      // Navigate to dashboard — the DashboardRedirect will handle role routing
+      navigate("/dashboard");
     } else {
       toast({
         title: "Login Failed",
-        description: "Invalid email. Try admin@school.com, teacher@school.com, student@school.com, or parent@school.com",
+        description: "Invalid email or password. Please try again.",
         variant: "destructive",
       });
     }
@@ -45,17 +50,10 @@ const Login = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1),transparent_70%)]" />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 text-primary-foreground max-w-md">
           <GraduationCap className="h-16 w-16 mb-8" />
-          <h1 className="text-4xl font-heading font-bold mb-4">Welcome back to EduVerse</h1>
-          <p className="text-primary-foreground/80 text-lg">Manage your institution with the most powerful school management platform.</p>
-          <div className="mt-8 p-4 rounded-xl bg-primary-foreground/10 backdrop-blur-sm">
-            <p className="text-sm font-medium mb-2">Demo Accounts:</p>
-            <div className="space-y-1 text-xs text-primary-foreground/80">
-              <p>admin@school.com → Admin</p>
-              <p>teacher@school.com → Teacher</p>
-              <p>student@school.com → Student</p>
-              <p>parent@school.com → Parent</p>
-            </div>
-          </div>
+          <h1 className="text-4xl font-heading font-bold mb-4">Welcome to EduVerse</h1>
+          <p className="text-primary-foreground/80 text-lg">
+            Manage your institution with the most powerful school management platform.
+          </p>
         </motion.div>
       </div>
 
@@ -87,19 +85,10 @@ const Login = () => {
                 </button>
               </div>
             </div>
-            <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground">
-              Sign In
+            <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground" disabled={loading}>
+              {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Signing in...</> : "Sign In"}
             </Button>
           </form>
-
-          {/* Demo credentials for mobile */}
-          <div className="lg:hidden mt-6 p-4 rounded-xl border bg-card">
-            <p className="text-sm font-medium mb-2">Demo Accounts:</p>
-            <div className="space-y-1 text-xs text-muted-foreground">
-              <p>admin@school.com • teacher@school.com</p>
-              <p>student@school.com • parent@school.com</p>
-            </div>
-          </div>
         </motion.div>
       </div>
     </div>
