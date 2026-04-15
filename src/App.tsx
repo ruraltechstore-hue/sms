@@ -47,6 +47,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<DashboardRedirect />} />
             <Route path="/dashboard/admin" element={<WrappedPage><Dashboard /></WrappedPage>} />
             <Route path="/dashboard/teacher" element={<WrappedPage><Dashboard /></WrappedPage>} />
