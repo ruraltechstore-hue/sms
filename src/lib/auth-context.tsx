@@ -1,30 +1,18 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
+import type { User, UserRole } from "@/lib/types";
+import { authService } from "@/lib/services/authService";
 
-export type UserRole = "admin" | "teacher" | "student" | "parent";
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatar?: string;
-}
+export type { UserRole, User };
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-const MOCK_USERS: Record<string, User> = {
-  "admin@school.com": { id: "1", name: "Rajesh Kumar", email: "admin@school.com", role: "admin" },
-  "teacher@school.com": { id: "2", name: "Amit Patel", email: "teacher@school.com", role: "teacher" },
-  "student@school.com": { id: "3", name: "Arjun Singh", email: "student@school.com", role: "student" },
-  "parent@school.com": { id: "4", name: "Sunita Devi", email: "parent@school.com", role: "parent" },
-};
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   admin: "Admin",
@@ -42,20 +30,31 @@ export const ROLE_DASHBOARD: Record<UserRole, string> = {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const login = useCallback((email: string, _password: string) => {
-    const found = MOCK_USERS[email.toLowerCase()];
-    if (found) {
-      setUser(found);
-      return true;
+  const login = useCallback(async (email: string, password: string) => {
+    setLoading(true);
+    try {
+      const result = await authService.login(email, password);
+      if (result) {
+        setUser(result);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    } finally {
+      setLoading(false);
     }
-    return false;
   }, []);
 
-  const logout = useCallback(() => setUser(null), []);
+  const logout = useCallback(() => {
+    authService.logout();
+    setUser(null);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,24 +5,25 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { MOCK_STUDENTS, CLASS_OPTIONS, STATUS_OPTIONS, type Student } from "@/lib/mock-students";
+import { EmptyState } from "@/components/EmptyState";
+import { CLASS_OPTIONS, STATUS_OPTIONS, type Student } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 8;
 
 interface StudentTableProps {
+  students: Student[];
   onViewStudent: (student: Student) => void;
 }
 
-export function StudentTable({ onViewStudent }: StudentTableProps) {
+export function StudentTable({ students, onViewStudent }: StudentTableProps) {
   const [search, setSearch] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
-    return MOCK_STUDENTS.filter((s) => {
+    return students.filter((s) => {
       const matchSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
         s.id.toLowerCase().includes(search.toLowerCase()) ||
         s.email.toLowerCase().includes(search.toLowerCase());
@@ -30,7 +31,7 @@ export function StudentTable({ onViewStudent }: StudentTableProps) {
       const matchStatus = statusFilter === "all" || s.status === statusFilter;
       return matchSearch && matchClass && matchStatus;
     });
-  }, [search, classFilter, statusFilter]);
+  }, [students, search, classFilter, statusFilter]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -49,7 +50,6 @@ export function StudentTable({ onViewStudent }: StudentTableProps) {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -81,104 +81,101 @@ export function StudentTable({ onViewStudent }: StudentTableProps) {
         </Select>
       </div>
 
-      {/* Table */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border bg-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-secondary/30">
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Student</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden md:table-cell">ID</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Class</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden lg:table-cell">Attendance</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden lg:table-cell">CGPA</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden sm:table-cell">Fees</th>
-                <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
-                <th className="text-right py-3 px-4 font-medium text-muted-foreground">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {paginated.map((student) => (
-                <tr key={student.id} className="hover:bg-secondary/30 transition-colors group">
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
-                        {student.name.charAt(0)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium truncate">{student.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{student.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground font-mono text-xs hidden md:table-cell">{student.id}</td>
-                  <td className="py-3 px-4">{student.class}-{student.section}</td>
-                  <td className="py-3 px-4 hidden lg:table-cell">
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-16 rounded-full bg-secondary overflow-hidden">
-                        <div className="h-full rounded-full bg-success" style={{ width: `${student.attendance}%` }} />
-                      </div>
-                      <span className="text-xs text-muted-foreground">{student.attendance}%</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 font-medium hidden lg:table-cell">{student.cgpa}</td>
-                  <td className="py-3 px-4 hidden sm:table-cell">
-                    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium border", feeColor(student.feeStatus))}>
-                      {student.feeStatus}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium capitalize border", statusColor(student.status))}>
-                      {student.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onViewStudent(student)}>
-                          <Eye className="h-4 w-4 mr-2" /> View Profile
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
-              ))}
-              {paginated.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-muted-foreground">
-                    No students found matching your filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t bg-secondary/20">
-            <p className="text-xs text-muted-foreground">
-              Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
-            </p>
-            <div className="flex items-center gap-1">
-              <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(page - 1)}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <Button key={p} variant={p === page ? "default" : "ghost"} size="icon" className={cn("h-8 w-8 text-xs", p === page && "bg-primary text-primary-foreground")} onClick={() => setPage(p)}>
-                  {p}
-                </Button>
-              ))}
-              <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+        {paginated.length === 0 ? (
+          <EmptyState title="No Students Found" description={students.length === 0 ? "Student data will appear here once connected to the backend." : "No students match your current filters."} />
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-secondary/30">
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Student</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden md:table-cell">ID</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Class</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden lg:table-cell">Attendance</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden lg:table-cell">CGPA</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground hidden sm:table-cell">Fees</th>
+                    <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
+                    <th className="text-right py-3 px-4 font-medium text-muted-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {paginated.map((student) => (
+                    <tr key={student.id} className="hover:bg-secondary/30 transition-colors group">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
+                            {student.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">{student.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{student.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-muted-foreground font-mono text-xs hidden md:table-cell">{student.id}</td>
+                      <td className="py-3 px-4">{student.class}-{student.section}</td>
+                      <td className="py-3 px-4 hidden lg:table-cell">
+                        <div className="flex items-center gap-2">
+                          <div className="h-1.5 w-16 rounded-full bg-secondary overflow-hidden">
+                            <div className="h-full rounded-full bg-success" style={{ width: `${student.attendance}%` }} />
+                          </div>
+                          <span className="text-xs text-muted-foreground">{student.attendance}%</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 font-medium hidden lg:table-cell">{student.cgpa}</td>
+                      <td className="py-3 px-4 hidden sm:table-cell">
+                        <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium border", feeColor(student.feeStatus))}>
+                          {student.feeStatus}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium capitalize border", statusColor(student.status))}>
+                          {student.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => onViewStudent(student)}>
+                              <Eye className="h-4 w-4 mr-2" /> View Profile
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 border-t bg-secondary/20">
+                <p className="text-xs text-muted-foreground">
+                  Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
+                </p>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(page - 1)}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <Button key={p} variant={p === page ? "default" : "ghost"} size="icon" className={cn("h-8 w-8 text-xs", p === page && "bg-primary text-primary-foreground")} onClick={() => setPage(p)}>
+                      {p}
+                    </Button>
+                  ))}
+                  <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </motion.div>
     </div>

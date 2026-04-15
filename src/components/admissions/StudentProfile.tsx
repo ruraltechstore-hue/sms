@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, Heart, BookOpen, Users, CreditCard, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Student } from "@/lib/mock-students";
+import type { Student } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface StudentProfileProps {
@@ -31,7 +31,6 @@ export function StudentProfile({ student, onBack }: StudentProfileProps) {
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="h-5 w-5" />
@@ -39,7 +38,6 @@ export function StudentProfile({ student, onBack }: StudentProfileProps) {
         <h2 className="text-xl font-heading font-bold">Student Profile</h2>
       </div>
 
-      {/* Profile Card */}
       <div className="rounded-2xl border bg-card p-6">
         <div className="flex flex-col sm:flex-row items-start gap-6">
           <div className="h-20 w-20 rounded-2xl bg-gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold shrink-0">
@@ -68,7 +66,6 @@ export function StudentProfile({ student, onBack }: StudentProfileProps) {
         </div>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="personal" className="space-y-4">
         <TabsList className="bg-secondary/50">
           <TabsTrigger value="personal">Personal</TabsTrigger>

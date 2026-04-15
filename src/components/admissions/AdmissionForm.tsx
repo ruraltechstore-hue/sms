@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { CLASS_OPTIONS, SECTION_OPTIONS } from "@/lib/mock-students";
+import { CLASS_OPTIONS, SECTION_OPTIONS } from "@/lib/types";
+import { studentService } from "@/lib/services/studentService";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
@@ -23,6 +24,7 @@ interface AdmissionFormProps {
 
 export function AdmissionForm({ onClose }: AdmissionFormProps) {
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
   const [form, setForm] = useState({
     name: "", email: "", phone: "", dateOfBirth: "", gender: "", bloodGroup: "",
@@ -33,9 +35,17 @@ export function AdmissionForm({ onClose }: AdmissionFormProps) {
 
   const update = (field: string, value: string) => setForm((p) => ({ ...p, [field]: value }));
 
-  const handleSubmit = () => {
-    toast({ title: "Application Submitted", description: `${form.name}'s admission application has been submitted successfully.` });
-    onClose();
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      await studentService.create(form as any);
+      toast({ title: "Application Submitted", description: `${form.name}'s admission application has been submitted successfully.` });
+      onClose();
+    } catch {
+      toast({ title: "Error", description: "Failed to submit application. Please try again.", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const canNext = () => {
@@ -47,7 +57,6 @@ export function AdmissionForm({ onClose }: AdmissionFormProps) {
 
   return (
     <div className="space-y-6">
-      {/* Stepper */}
       <div className="flex items-center justify-between">
         {STEPS.map((s, i) => (
           <div key={s.id} className="flex items-center flex-1">
@@ -69,7 +78,6 @@ export function AdmissionForm({ onClose }: AdmissionFormProps) {
         ))}
       </div>
 
-      {/* Form Steps */}
       <AnimatePresence mode="wait">
         <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
           {step === 1 && (
@@ -181,7 +189,7 @@ export function AdmissionForm({ onClose }: AdmissionFormProps) {
 
           {step === 4 && (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">Upload required documents (mock — no actual upload in demo)</p>
+              <p className="text-sm text-muted-foreground">Upload required documents</p>
               {["Birth Certificate", "Previous School TC", "Report Card", "Passport Photo", "Aadhaar Card"].map((doc) => (
                 <div key={doc} className="flex items-center justify-between p-4 rounded-xl border bg-secondary/30 hover:bg-secondary/50 transition-colors">
                   <div className="flex items-center gap-3">
@@ -196,7 +204,6 @@ export function AdmissionForm({ onClose }: AdmissionFormProps) {
         </motion.div>
       </AnimatePresence>
 
-      {/* Navigation */}
       <div className="flex justify-between pt-4 border-t">
         <Button variant="outline" onClick={() => step === 1 ? onClose() : setStep(step - 1)}>
           <ChevronLeft className="h-4 w-4 mr-1" />{step === 1 ? "Cancel" : "Back"}
@@ -206,8 +213,8 @@ export function AdmissionForm({ onClose }: AdmissionFormProps) {
             Next <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         ) : (
-          <Button onClick={handleSubmit} className="bg-gradient-primary text-primary-foreground">
-            <Check className="h-4 w-4 mr-1" /> Submit Application
+          <Button onClick={handleSubmit} disabled={submitting} className="bg-gradient-primary text-primary-foreground">
+            <Check className="h-4 w-4 mr-1" /> {submitting ? "Submitting..." : "Submit Application"}
           </Button>
         )}
       </div>
