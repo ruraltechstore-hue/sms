@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, useAuth, ROLE_DASHBOARD } from "@/lib/auth-context";
+import { useAuth, ROLE_DASHBOARD } from "@/lib/auth-context";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import Index from "./pages/Index";
@@ -39,34 +39,32 @@ function WrappedPage({ children }: { children: React.ReactNode }) {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/dashboard" element={<DashboardRedirect />} />
-            <Route path="/dashboard/admin" element={<WrappedPage><Dashboard /></WrappedPage>} />
-            <Route path="/dashboard/teacher" element={<WrappedPage><Dashboard /></WrappedPage>} />
-            <Route path="/dashboard/student" element={<WrappedPage><Dashboard /></WrappedPage>} />
-            <Route path="/dashboard/parent" element={<WrappedPage><Dashboard /></WrappedPage>} />
-            <Route path="/admissions" element={<WrappedPage><Admissions /></WrappedPage>} />
-            <Route path="/attendance" element={<WrappedPage><Attendance /></WrappedPage>} />
-            <Route path="/fees" element={<WrappedPage><Fees /></WrappedPage>} />
-            <Route path="/messaging" element={<WrappedPage><Messaging /></WrappedPage>} />
-            <Route path="/exams" element={<WrappedPage><Exams /></WrappedPage>} />
-            <Route path="/staff" element={<WrappedPage><Staff /></WrappedPage>} />
-            <Route path="/parent-portal" element={<WrappedPage><ParentPortal /></WrappedPage>} />
-            <Route path="/settings" element={<WrappedPage><Settings /></WrappedPage>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/dashboard" element={<DashboardRedirect />} />
+          <Route path="/dashboard/admin" element={<WrappedPage><Dashboard /></WrappedPage>} />
+          <Route path="/dashboard/teacher" element={<WrappedPage><Dashboard /></WrappedPage>} />
+          <Route path="/dashboard/student" element={<WrappedPage><Dashboard /></WrappedPage>} />
+          <Route path="/dashboard/parent" element={<WrappedPage><Dashboard /></WrappedPage>} />
+          <Route path="/admissions" element={<WrappedPage><Admissions /></WrappedPage>} />
+          <Route path="/attendance" element={<WrappedPage><Attendance /></WrappedPage>} />
+          <Route path="/fees" element={<WrappedPage><Fees /></WrappedPage>} />
+          <Route path="/messaging" element={<WrappedPage><Messaging /></WrappedPage>} />
+          <Route path="/exams" element={<WrappedPage><Exams /></WrappedPage>} />
+          <Route path="/staff" element={<WrappedPage><Staff /></WrappedPage>} />
+          <Route path="/parent-portal" element={<WrappedPage><ParentPortal /></WrappedPage>} />
+          <Route path="/settings" element={<WrappedPage><Settings /></WrappedPage>} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 
