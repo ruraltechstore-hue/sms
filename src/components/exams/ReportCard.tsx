@@ -1,4 +1,4 @@
-import { StudentGrade } from "@/lib/mock-exams";
+import type { StudentGrade } from "@/lib/types";
 import { Separator } from "@/components/ui/separator";
 import { Award } from "lucide-react";
 
@@ -15,8 +15,8 @@ export function ReportCard({ student }: ReportCardProps) {
   return (
     <div className="bg-card rounded-xl p-6 space-y-4 text-sm">
       <div className="text-center space-y-1">
-        <h3 className="font-heading font-bold text-lg">Vidyalaya School</h3>
-        <p className="text-muted-foreground text-xs">Annual Examination Report Card 2024-25</p>
+        <h3 className="font-heading font-bold text-lg">School ERP</h3>
+        <p className="text-muted-foreground text-xs">Examination Report Card</p>
       </div>
 
       <Separator />
@@ -45,7 +45,7 @@ export function ReportCard({ student }: ReportCardProps) {
               <td className="py-2">{sub.subject}</td>
               <td className="py-2 text-center text-muted-foreground">{sub.maxMarks}</td>
               <td className="py-2 text-center font-semibold">{sub.obtained}</td>
-              <td className={`py-2 text-center font-bold ${gradeColors[sub.grade]}`}>{sub.grade}</td>
+              <td className={`py-2 text-center font-bold ${gradeColors[sub.grade] || ""}`}>{sub.grade}</td>
             </tr>
           ))}
         </tbody>
@@ -54,7 +54,7 @@ export function ReportCard({ student }: ReportCardProps) {
             <td className="pt-2">Total</td>
             <td className="pt-2 text-center">{student.maxTotal}</td>
             <td className="pt-2 text-center">{student.totalMarks}</td>
-            <td className={`pt-2 text-center font-bold ${gradeColors[student.grade]}`}>{student.grade}</td>
+            <td className={`pt-2 text-center font-bold ${gradeColors[student.grade] || ""}`}>{student.grade}</td>
           </tr>
         </tfoot>
       </table>
@@ -75,7 +75,7 @@ export function ReportCard({ student }: ReportCardProps) {
         </div>
         <div className="text-right">
           <p className="text-muted-foreground text-xs">Overall Grade</p>
-          <p className={`font-bold text-2xl ${gradeColors[student.grade]}`}>{student.grade}</p>
+          <p className={`font-bold text-2xl ${gradeColors[student.grade] || ""}`}>{student.grade}</p>
         </div>
       </div>
 
