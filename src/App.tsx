@@ -8,6 +8,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Admissions from "./pages/Admissions";
 import Attendance from "./pages/Attendance";
@@ -45,6 +47,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<DashboardRedirect />} />
             <Route path="/dashboard/admin" element={<WrappedPage><Dashboard /></WrappedPage>} />
             <Route path="/dashboard/teacher" element={<WrappedPage><Dashboard /></WrappedPage>} />
