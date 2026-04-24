@@ -23,6 +23,7 @@ import Settings from "./pages/Settings";
 import Transport from "./pages/Transport";
 import Library from "./pages/Library";
 import Hostel from "./pages/Hostel";
+import Assignments from "./pages/Assignments";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -93,6 +94,7 @@ const App = () => (
           <Route path="/transport"     element={<Guarded><Transport /></Guarded>} />
           <Route path="/library"       element={<Guarded><Library /></Guarded>} />
           <Route path="/hostel"        element={<Guarded><Hostel /></Guarded>} />
+          <Route path="/assignments"   element={<Guarded><Assignments /></Guarded>} />
           <Route path="/settings"      element={<Guarded><Settings /></Guarded>} />
 
           <Route path="*" element={<NotFound />} />

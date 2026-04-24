@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   GraduationCap, LayoutDashboard, Users, CalendarDays, CreditCard,
   MessageSquare, ClipboardCheck, BookOpen, Bus, Library, Home as HomeIcon,
-  LogOut, ChevronLeft, Menu, Settings, X, Bell, ShieldCheck,
+  LogOut, ChevronLeft, Menu, Settings, X, Bell, ShieldCheck, ClipboardList,
 } from "lucide-react";
 import { useAuth, ROLE_LABELS } from "@/lib/auth-context";
 import type { UserRole } from "@/lib/types";
@@ -55,18 +55,20 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { icon: GraduationCap,   label: "Admissions",  href: "/admissions" },
     { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
   ],
-  // 4. Teacher — own subjects: attendance + grades + messaging
+  // 4. Teacher — own subjects: attendance + marks + homework + messaging
   teacher: [
     { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/teacher" },
     { icon: CalendarDays,    label: "Attendance",  href: "/attendance" },
+    { icon: ClipboardList,   label: "Homework",    href: "/assignments" },
     { icon: ClipboardCheck,  label: "Exams",       href: "/exams" },
     { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
   ],
-  // 5. Class Teacher — full assigned-class control
+  // 5. Class Teacher — full assigned-class control + assignments
   class_teacher: [
     { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/class-teacher" },
     { icon: GraduationCap,   label: "Class Roster",href: "/admissions" },
     { icon: CalendarDays,    label: "Attendance",  href: "/attendance" },
+    { icon: ClipboardList,   label: "Assignments", href: "/assignments" },
     { icon: ClipboardCheck,  label: "Exams",       href: "/exams" },
     { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
   ],
@@ -91,17 +93,19 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/hostel" },
     { icon: HomeIcon,        label: "Hostel",      href: "/hostel" },
   ],
-  // 10. Student — strict read-only personal data
+  // 10. Student — strict read-only personal data + assignments
   student: [
     { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/student" },
     { icon: CalendarDays,    label: "Attendance",  href: "/attendance" },
+    { icon: ClipboardList,   label: "Assignments", href: "/assignments" },
     { icon: ClipboardCheck,  label: "Exams",       href: "/exams" },
     { icon: CreditCard,      label: "Fees",        href: "/fees" },
   ],
-  // 11. Parent — strict read-only child data + messaging w/ teachers
+  // 11. Parent — strict read-only child data + assignments + messaging
   parent: [
     { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/parent" },
     { icon: BookOpen,        label: "Parent Portal", href: "/parent-portal" },
+    { icon: ClipboardList,   label: "Assignments", href: "/assignments" },
     { icon: CreditCard,      label: "Fees",        href: "/fees" },
     { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
   ],
