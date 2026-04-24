@@ -17,6 +17,8 @@ import type { Student } from "@/lib/types";
 const ROLES_THAT_CAN_CREATE: ReadonlyArray<string> = ["principal", "sms_admin", "front_desk"];
 
 export default function Admissions() {
+  const { user } = useAuth();
+  const canCreate = user ? ROLES_THAT_CAN_CREATE.includes(user.role) : false;
   const [showForm, setShowForm] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
