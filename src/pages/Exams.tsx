@@ -11,6 +11,7 @@ import { useIsReadOnly } from "@/lib/auth-context";
 
 export default function Exams() {
   const [loading, setLoading] = useState(true);
+  const readOnly = useIsReadOnly();
 
   useEffect(() => {
     // TODO: fetch exam stats from API
