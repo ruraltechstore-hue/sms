@@ -90,10 +90,19 @@ const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
-            <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          <div className="mt-4 text-center space-y-2">
+            <Link
+              to="/forgot-password"
+              className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
               Forgot your password?
             </Link>
+            <p className="text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-primary hover:underline">
+                Create one
+              </Link>
+            </p>
           </div>
         </motion.div>
       </div>
