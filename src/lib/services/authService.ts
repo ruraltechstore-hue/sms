@@ -27,23 +27,19 @@ export const authService = {
     role: UserRole
   ): Promise<User | null> => {
     const redirectUrl = `${window.location.origin}/`;
+    // Pass `role` and `name` in user metadata so the `handle_new_user`
+    // database trigger can create the user_roles row with elevated
+    // privileges (SECURITY DEFINER) — this works whether or not a session
+    // is returned synchronously (i.e. regardless of email-confirmation mode).
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { name },
+        data: { name, role },
       },
     });
     if (error || !data.user) return null;
-
-    // Persist the chosen role. RLS allows admins or the user themselves
-    // to insert their own row only if they are an admin — for first signup
-    // we rely on a public flow: insert via the user's own session.
-    // Until a session exists (email confirmation on), this will silently no-op.
-    if (data.session) {
-      await supabase.from("user_roles").insert({ user_id: data.user.id, role });
-    }
 
     return await authService.buildUser(data.user.id, data.user.email ?? email, { name });
   },

@@ -112,10 +112,9 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  if (!user) {
-    navigate("/login");
-    return null;
-  }
+  // ProtectedRoute guarantees `user` is non-null here, but guard defensively
+  // without calling navigate() during render (which would warn in React).
+  if (!user) return null;
 
   const navItems = NAV_BY_ROLE[user.role] ?? NAV_BY_ROLE.student;
   const currentPage = navItems.find((n) => n.href === location.pathname)?.label || "Dashboard";
