@@ -11,7 +11,10 @@ import { StudentProfile } from "@/components/admissions/StudentProfile";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingState } from "@/components/LoadingState";
 import { studentService } from "@/lib/services/studentService";
+import { useAuth } from "@/lib/auth-context";
 import type { Student } from "@/lib/types";
+
+const ROLES_THAT_CAN_CREATE: ReadonlyArray<string> = ["principal", "sms_admin", "front_desk"];
 
 export default function Admissions() {
   const [showForm, setShowForm] = useState(false);
