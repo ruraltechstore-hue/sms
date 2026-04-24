@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import type { User, UserRole, RoleGroup } from "@/lib/types";
-import { ROLE_GROUP } from "@/lib/types";
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from "react";
+import type { User, UserRole } from "@/lib/types";
 import { authService } from "@/lib/services/authService";
 import { supabase } from "@/integrations/supabase/client";
+import { isReadOnlyRole } from "@/lib/rbac";
 
 export type { UserRole, User };
 
