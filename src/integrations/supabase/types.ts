@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignment_submissions: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          id: string
+          remarks: string | null
+          score: number | null
+          status: string
+          student_id: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          id?: string
+          remarks?: string | null
+          score?: number | null
+          status?: string
+          student_id: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          remarks?: string | null
+          score?: number | null
+          status?: string
+          student_id?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_submissions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignments: {
+        Row: {
+          class_id: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          kind: string
+          subject: string | null
+          teacher_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          kind?: string
+          subject?: string | null
+          teacher_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          kind?: string
+          subject?: string | null
+          teacher_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       attendance: {
         Row: {
           class_id: string | null
@@ -69,6 +152,89 @@ export type Database = {
           },
         ]
       }
+      book_issues: {
+        Row: {
+          book_id: string
+          created_at: string
+          due_date: string | null
+          fine: number
+          id: string
+          issue_date: string
+          return_date: string | null
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          due_date?: string | null
+          fine?: number
+          id?: string
+          issue_date?: string
+          return_date?: string | null
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          due_date?: string | null
+          fine?: number
+          id?: string
+          issue_date?: string
+          return_date?: string | null
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_issues_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      books: {
+        Row: {
+          author: string | null
+          available_copies: number
+          category: string | null
+          created_at: string
+          id: string
+          isbn: string | null
+          title: string
+          total_copies: number
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          available_copies?: number
+          category?: string | null
+          created_at?: string
+          id?: string
+          isbn?: string | null
+          title: string
+          total_copies?: number
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          available_copies?: number
+          category?: string | null
+          created_at?: string
+          id?: string
+          isbn?: string | null
+          title?: string
+          total_copies?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       classes: {
         Row: {
           class_teacher_id: string | null
@@ -103,6 +269,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      drivers: {
+        Row: {
+          created_at: string
+          id: string
+          license_no: string | null
+          name: string
+          phone: string | null
+          updated_at: string
+          vehicle: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          license_no?: string | null
+          name: string
+          phone?: string | null
+          updated_at?: string
+          vehicle?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          license_no?: string | null
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          vehicle?: string | null
+        }
+        Relationships: []
       }
       exams: {
         Row: {
@@ -235,6 +431,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hostel_rooms: {
+        Row: {
+          block: string | null
+          capacity: number
+          created_at: string
+          id: string
+          notes: string | null
+          occupancy: number
+          room_number: string
+          updated_at: string
+        }
+        Insert: {
+          block?: string | null
+          capacity?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          occupancy?: number
+          room_number: string
+          updated_at?: string
+        }
+        Update: {
+          block?: string | null
+          capacity?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          occupancy?: number
+          room_number?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       library: {
         Row: {
