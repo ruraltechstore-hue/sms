@@ -139,3 +139,14 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
+
+/**
+ * Returns true when the current user must NOT see any create/update/delete UI.
+ * Currently true for student & parent roles. Combined with backend RLS to
+ * provide defense-in-depth.
+ */
+export function useIsReadOnly(): boolean {
+  const { user } = useAuth();
+  return useMemo(() => (user ? isReadOnlyRole(user.role) : true), [user]);
+}
+
