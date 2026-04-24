@@ -20,6 +20,9 @@ import Exams from "./pages/Exams";
 import Staff from "./pages/Staff";
 import ParentPortal from "./pages/ParentPortal";
 import Settings from "./pages/Settings";
+import Transport from "./pages/Transport";
+import Library from "./pages/Library";
+import Hostel from "./pages/Hostel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
