@@ -1,5 +1,35 @@
 // ==================== Auth ====================
-export type UserRole = "admin" | "teacher" | "student" | "parent";
+// All 11 roles supported by the backend (Lovable Cloud).
+export type UserRole =
+  | "principal"
+  | "sms_admin"
+  | "front_desk"
+  | "teacher"
+  | "class_teacher"
+  | "exam_coordinator"
+  | "transport_manager"
+  | "librarian"
+  | "hostel_warden"
+  | "student"
+  | "parent";
+
+// High-level grouping used by the frontend to pick a dashboard / nav set.
+// Every role maps to exactly one group.
+export type RoleGroup = "admin" | "teacher" | "student" | "parent";
+
+export const ROLE_GROUP: Record<UserRole, RoleGroup> = {
+  principal: "admin",
+  sms_admin: "admin",
+  front_desk: "admin",
+  exam_coordinator: "admin",
+  transport_manager: "admin",
+  librarian: "admin",
+  hostel_warden: "admin",
+  teacher: "teacher",
+  class_teacher: "teacher",
+  student: "student",
+  parent: "parent",
+};
 
 export interface User {
   id: string;

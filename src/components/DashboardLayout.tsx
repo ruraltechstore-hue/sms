@@ -5,7 +5,8 @@ import {
   MessageSquare, Building2, ClipboardCheck, UserCog, BookOpen,
   LogOut, ChevronLeft, Menu, Settings, X, Bell,
 } from "lucide-react";
-import { useAuth, UserRole, ROLE_LABELS, ROLE_DASHBOARD } from "@/lib/auth-context";
+import { useAuth, ROLE_LABELS, ROLE_DASHBOARD } from "@/lib/auth-context";
+import { ROLE_GROUP, type RoleGroup } from "@/lib/types";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -18,7 +19,9 @@ interface NavItem {
   href: string;
 }
 
-const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
+// Navigation is grouped by RoleGroup. All 11 roles map to one of these groups
+// via ROLE_GROUP, so adding a new role doesn't require duplicating nav.
+const NAV_BY_GROUP: Record<RoleGroup, NavItem[]> = {
   admin: [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
     { icon: GraduationCap, label: "Admissions", href: "/admissions" },
@@ -73,7 +76,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     return null;
   }
 
-  const navItems = NAV_BY_ROLE[user.role];
+  const navItems = NAV_BY_GROUP[ROLE_GROUP[user.role]];
   const currentPage = navItems.find((n) => n.href === location.pathname)?.label || "Dashboard";
 
   return (
