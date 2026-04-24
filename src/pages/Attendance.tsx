@@ -7,6 +7,7 @@ import { AttendanceMarking } from "@/components/attendance/AttendanceMarking";
 import { AttendanceCalendar } from "@/components/attendance/AttendanceCalendar";
 import { AttendanceCharts } from "@/components/attendance/AttendanceCharts";
 import { LoadingState } from "@/components/LoadingState";
+import { useIsReadOnly } from "@/lib/auth-context";
 
 export default function Attendance() {
   const [loading, setLoading] = useState(true);
