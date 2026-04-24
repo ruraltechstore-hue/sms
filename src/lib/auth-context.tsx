@@ -31,19 +31,22 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   parent: "Parent",
 };
 
-const GROUP_DASHBOARD: Record<RoleGroup, string> = {
-  admin: "/dashboard/admin",
-  teacher: "/dashboard/teacher",
-  student: "/dashboard/student",
-  parent: "/dashboard/parent",
-};
-
 /**
- * Maps any of the 11 roles to its dashboard route via its role group.
+ * One dedicated dashboard route per role.
  */
-export const ROLE_DASHBOARD: Record<UserRole, string> = Object.fromEntries(
-  (Object.keys(ROLE_GROUP) as UserRole[]).map((r) => [r, GROUP_DASHBOARD[ROLE_GROUP[r]]])
-) as Record<UserRole, string>;
+export const ROLE_DASHBOARD: Record<UserRole, string> = {
+  principal:         "/dashboard/principal",
+  sms_admin:         "/dashboard/admin",
+  front_desk:        "/dashboard/front-desk",
+  teacher:           "/dashboard/teacher",
+  class_teacher:     "/dashboard/class-teacher",
+  exam_coordinator:  "/dashboard/exam-coordinator",
+  transport_manager: "/dashboard/transport",
+  librarian:         "/dashboard/librarian",
+  hostel_warden:     "/dashboard/hostel",
+  student:           "/dashboard/student",
+  parent:            "/dashboard/parent",
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
