@@ -32,7 +32,14 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   "/admissions":   [...ALL_ADMINS, "front_desk", "class_teacher"],
   "/attendance":   [...ALL_ADMINS, ...ALL_TEACHING, "student"],
   "/exams":        [...ALL_ADMINS, ...ALL_TEACHING, "exam_coordinator", "student"],
+
+  // Fees: admins, students & parents (read-only). Librarian explicitly excluded.
   "/fees":         [...ALL_ADMINS, "student", "parent"],
+
+  // Assignments / Homework / Tasks: created by class_teacher & teacher;
+  // viewed read-only by student (own class) and parent (own child class).
+  "/assignments":  [...ALL_ADMINS, ...ALL_TEACHING, "student", "parent"],
+
   "/staff":        [...ALL_ADMINS],
   "/messaging":    [
     ...ALL_ADMINS,
@@ -42,9 +49,16 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
     "parent",
   ],
   "/parent-portal":[...ALL_ADMINS, "parent"],
+
+  // Transport: ONLY admins + transport manager. No academic access.
   "/transport":    [...ALL_ADMINS, "transport_manager"],
+
+  // Library: ONLY admins + librarian. No fees access.
   "/library":      [...ALL_ADMINS, "librarian"],
+
+  // Hostel: ONLY admins + hostel warden.
   "/hostel":       [...ALL_ADMINS, "hostel_warden"],
+
   "/settings":     [...ALL_ADMINS],
 };
 
