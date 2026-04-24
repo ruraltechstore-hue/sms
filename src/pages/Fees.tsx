@@ -7,6 +7,7 @@ import { FeeStructureTable } from "@/components/fees/FeeStructureTable";
 import { PaymentTracker } from "@/components/fees/PaymentTracker";
 import { FeeAnalytics } from "@/components/fees/FeeAnalytics";
 import { LoadingState } from "@/components/LoadingState";
+import { useIsReadOnly } from "@/lib/auth-context";
 
 export default function Fees() {
   const [loading, setLoading] = useState(true);
