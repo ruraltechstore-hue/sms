@@ -7,6 +7,7 @@ import { ExamSchedule } from "@/components/exams/ExamSchedule";
 import { GradeEntry } from "@/components/exams/GradeEntry";
 import { PerformanceAnalytics } from "@/components/exams/PerformanceAnalytics";
 import { LoadingState } from "@/components/LoadingState";
+import { useIsReadOnly } from "@/lib/auth-context";
 
 export default function Exams() {
   const [loading, setLoading] = useState(true);
