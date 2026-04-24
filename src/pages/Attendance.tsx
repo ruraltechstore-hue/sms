@@ -12,6 +12,7 @@ import { useIsReadOnly } from "@/lib/auth-context";
 export default function Attendance() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ present: 0, absent: 0, late: 0, overallRate: 0 });
+  const readOnly = useIsReadOnly();
 
   useEffect(() => {
     // TODO: fetch attendance stats from API
