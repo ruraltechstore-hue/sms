@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   GraduationCap, Users, CreditCard, CalendarDays, TrendingUp,
   ClipboardCheck, BookOpen, UserCheck, Bus, Library as LibraryIcon,
-  Home as HomeIcon, ShieldCheck, Megaphone, Award, FileCheck,
+  Home as HomeIcon, ShieldCheck, Megaphone, Award, FileCheck, ClipboardList,
 } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { useAuth } from "@/lib/auth-context";
@@ -376,20 +376,33 @@ function TeacherDashboard() {
 // ============================================================
 function ClassTeacherDashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ students: 0, present: 0, absent: 0 });
+  const [stats, setStats] = useState({ students: 0, present: 0, absent: 0, pendingAssignments: 0 });
   const [attendance, setAttendance] = useState<PieDatum[]>([]);
   const [classDist, setClassDist] = useState<PieDatum[]>([]);
+  const [submissionPie, setSubmissionPie] = useState<PieDatum[]>([]);
 
   useEffect(() => {
     (async () => {
-      const [students, a, cd] = await Promise.all([
+      const today = new Date().toISOString().slice(0, 10);
+      const [students, a, cd, { data: assignments }, { data: subs }] = await Promise.all([
         countRows("students"),
         fetchAttendancePie(),
         fetchClassDistributionPie(),
+        supabase.from("assignments").select("id, due_date"),
+        supabase.from("assignment_submissions").select("status"),
       ]);
       const present = a.find((d) => d.name === "Present")?.value ?? 0;
       const absent  = a.find((d) => d.name === "Absent")?.value ?? 0;
-      setStats({ students, present, absent });
+      const pendingAssignments = (assignments ?? []).filter((x: any) => !x.due_date || x.due_date >= today).length;
+      const buckets: Record<string, number> = { pending: 0, submitted: 0, late: 0, graded: 0 };
+      for (const s of subs ?? []) buckets[(s as any).status] = (buckets[(s as any).status] ?? 0) + 1;
+      setSubmissionPie([
+        { name: "Pending",   value: buckets.pending,   color: PALETTE.warning },
+        { name: "Submitted", value: buckets.submitted, color: PALETTE.primary },
+        { name: "Late",      value: buckets.late,      color: PALETTE.destructive },
+        { name: "Graded",    value: buckets.graded,    color: PALETTE.success },
+      ]);
+      setStats({ students, present, absent, pendingAssignments });
       setAttendance(a);
       setClassDist(cd);
       setLoading(false);
@@ -400,20 +413,22 @@ function ClassTeacherDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { title: "Class Strength", value: String(stats.students), icon: Users,       iconColor: "text-primary" },
-          { title: "Present Today",  value: String(stats.present),  icon: UserCheck,   iconColor: "text-success" },
-          { title: "Absent Today",   value: String(stats.absent),   icon: CalendarDays,iconColor: "text-destructive" },
+          { title: "Class Strength", value: String(stats.students),           icon: Users,         iconColor: "text-primary" },
+          { title: "Present Today",  value: String(stats.present),            icon: UserCheck,     iconColor: "text-success" },
+          { title: "Absent Today",   value: String(stats.absent),             icon: CalendarDays,  iconColor: "text-destructive" },
+          { title: "Pending Work",   value: String(stats.pendingAssignments), icon: ClipboardList, iconColor: "text-warning" },
         ].map((s, i) => (
           <motion.div key={s.title} {...anim} transition={{ delay: i * 0.05 }}>
             <StatCard {...s} />
           </motion.div>
         ))}
       </div>
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-3 gap-6">
         <PieCard title="Class Attendance"   data={attendance} />
         <PieCard title="Class Distribution" data={classDist} />
+        <PieCard title="Submission Status"  data={submissionPie} />
       </div>
     </div>
   );
@@ -520,23 +535,25 @@ function TransportDashboard() {
 // ============================================================
 function LibrarianDashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ records: 0, totalIssued: 0, totalFines: 0 });
+  const [stats, setStats] = useState({ titles: 0, issued: 0, available: 0, overdue: 0, fines: 0 });
   const [pie, setPie] = useState<PieDatum[]>([]);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("library").select("books_issued, fines");
-      let issued = 0, fines = 0, withBooks = 0;
-      for (const r of data ?? []) {
-        const bks = Array.isArray(r.books_issued) ? r.books_issued.length : 0;
-        issued += bks;
-        if (bks > 0) withBooks++;
-        fines += Number(r.fines) || 0;
-      }
-      setStats({ records: data?.length ?? 0, totalIssued: issued, totalFines: fines });
+      const today = new Date().toISOString().slice(0, 10);
+      const [{ data: books }, { data: issues }] = await Promise.all([
+        supabase.from("books").select("total_copies, available_copies"),
+        supabase.from("book_issues").select("status, due_date, fine"),
+      ]);
+      const totalCopies = (books ?? []).reduce((s, b: any) => s + Number(b.total_copies), 0);
+      const available  = (books ?? []).reduce((s, b: any) => s + Number(b.available_copies), 0);
+      const issued     = totalCopies - available;
+      const overdue    = (issues ?? []).filter((i: any) => i.status !== "returned" && i.due_date && i.due_date < today).length;
+      const fines      = (issues ?? []).reduce((s, i: any) => s + Number(i.fine || 0), 0);
+      setStats({ titles: books?.length ?? 0, issued, available, overdue, fines });
       setPie([
-        { name: "Students with Books", value: withBooks,                     color: PALETTE.primary },
-        { name: "No Books Issued",     value: (data?.length ?? 0) - withBooks, color: PALETTE.muted },
+        { name: "Issued",    value: issued,    color: PALETTE.primary },
+        { name: "Available", value: available, color: PALETTE.success },
       ]);
       setLoading(false);
     })();
@@ -546,18 +563,19 @@ function LibrarianDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { title: "Library Records", value: String(stats.records),     icon: LibraryIcon, iconColor: "text-primary" },
-          { title: "Books Issued",    value: String(stats.totalIssued), icon: BookOpen,    iconColor: "text-accent" },
-          { title: "Total Fines",     value: `₹${stats.totalFines}`,    icon: TrendingUp,  iconColor: "text-warning" },
+          { title: "Titles",       value: String(stats.titles),    icon: LibraryIcon, iconColor: "text-primary" },
+          { title: "Books Issued", value: String(stats.issued),    icon: BookOpen,    iconColor: "text-accent" },
+          { title: "Overdue",      value: String(stats.overdue),   icon: TrendingUp,  iconColor: "text-destructive" },
+          { title: "Total Fines",  value: `₹${stats.fines}`,       icon: TrendingUp,  iconColor: "text-warning" },
         ].map((s, i) => (
           <motion.div key={s.title} {...anim} transition={{ delay: i * 0.05 }}>
             <StatCard {...s} />
           </motion.div>
         ))}
       </div>
-      <PieCard title="Library Engagement" data={pie} />
+      <PieCard title="Books Issued vs Available" data={pie} />
     </div>
   );
 }
@@ -567,19 +585,23 @@ function LibrarianDashboard() {
 // ============================================================
 function HostelDashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ students: 0, rooms: 0 });
+  const [stats, setStats] = useState({ rooms: 0, capacity: 0, occupied: 0, available: 0 });
   const [pie, setPie] = useState<PieDatum[]>([]);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("hostel").select("room");
-      const rooms = new Map<string, number>();
-      for (const h of data ?? []) rooms.set(h.room, (rooms.get(h.room) ?? 0) + 1);
-      const colors = [PALETTE.primary, PALETTE.accent, PALETTE.success, PALETTE.warning, PALETTE.destructive];
-      setPie([...rooms.entries()].map(([name, value], i) => ({
-        name: `Room ${name}`, value, color: colors[i % colors.length],
-      })));
-      setStats({ students: data?.length ?? 0, rooms: rooms.size });
+      const [{ data: rooms }, { data: alloc }] = await Promise.all([
+        supabase.from("hostel_rooms").select("capacity"),
+        supabase.from("hostel").select("room"),
+      ]);
+      const capacity = (rooms ?? []).reduce((s, r: any) => s + Number(r.capacity), 0);
+      const occupied = alloc?.length ?? 0;
+      const available = Math.max(0, capacity - occupied);
+      setStats({ rooms: rooms?.length ?? 0, capacity, occupied, available });
+      setPie([
+        { name: "Occupied",  value: occupied,  color: PALETTE.primary },
+        { name: "Available", value: available, color: PALETTE.success },
+      ]);
       setLoading(false);
     })();
   }, []);
@@ -588,10 +610,12 @@ function HostelDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { title: "Hostel Students", value: String(stats.students), icon: GraduationCap, iconColor: "text-primary" },
-          { title: "Rooms Allocated", value: String(stats.rooms),    icon: HomeIcon,      iconColor: "text-accent" },
+          { title: "Rooms",     value: String(stats.rooms),     icon: HomeIcon,      iconColor: "text-primary" },
+          { title: "Capacity",  value: String(stats.capacity),  icon: Users,         iconColor: "text-accent" },
+          { title: "Occupied",  value: String(stats.occupied),  icon: GraduationCap, iconColor: "text-warning" },
+          { title: "Vacant",    value: String(stats.available), icon: HomeIcon,      iconColor: "text-success" },
         ].map((s, i) => (
           <motion.div key={s.title} {...anim} transition={{ delay: i * 0.05 }}>
             <StatCard {...s} />
