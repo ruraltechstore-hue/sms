@@ -26,74 +26,84 @@ interface NavItem {
  * because the Dashboard component picks the right view via ROLE_GROUP.
  */
 const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
+  // 1. Principal — full oversight (read + approve, all key modules)
   principal: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
-    { icon: GraduationCap, label: "Admissions", href: "/admissions" },
-    { icon: Users, label: "Staff", href: "/staff" },
-    { icon: CalendarDays, label: "Attendance", href: "/attendance" },
-    { icon: ClipboardCheck, label: "Exams", href: "/exams" },
-    { icon: CreditCard, label: "Fees", href: "/fees" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
-    { icon: BookOpen, label: "Parent Portal", href: "/parent-portal" },
-    { icon: Settings, label: "Settings", href: "/settings" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/principal" },
+    { icon: GraduationCap,   label: "Admissions",  href: "/admissions" },
+    { icon: Users,           label: "Staff",       href: "/staff" },
+    { icon: CalendarDays,    label: "Attendance",  href: "/attendance" },
+    { icon: ClipboardCheck,  label: "Exams",       href: "/exams" },
+    { icon: CreditCard,      label: "Fees",        href: "/fees" },
+    { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
+    { icon: BookOpen,        label: "Parent Portal", href: "/parent-portal" },
+    { icon: Settings,        label: "Settings",    href: "/settings" },
   ],
+  // 2. SMS Admin — system control: users, classes, settings
   sms_admin: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
-    { icon: GraduationCap, label: "Admissions", href: "/admissions" },
-    { icon: Users, label: "Staff", href: "/staff" },
-    { icon: CalendarDays, label: "Attendance", href: "/attendance" },
-    { icon: ClipboardCheck, label: "Exams", href: "/exams" },
-    { icon: CreditCard, label: "Fees", href: "/fees" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
-    { icon: ShieldCheck, label: "Settings", href: "/settings" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/admin" },
+    { icon: GraduationCap,   label: "Admissions",  href: "/admissions" },
+    { icon: Users,           label: "Staff",       href: "/staff" },
+    { icon: CalendarDays,    label: "Attendance",  href: "/attendance" },
+    { icon: ClipboardCheck,  label: "Exams",       href: "/exams" },
+    { icon: CreditCard,      label: "Fees",        href: "/fees" },
+    { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
+    { icon: ShieldCheck,     label: "Settings",    href: "/settings" },
   ],
+  // 3. Front Desk — admissions only
   front_desk: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
-    { icon: GraduationCap, label: "Admissions", href: "/admissions" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/front-desk" },
+    { icon: GraduationCap,   label: "Admissions",  href: "/admissions" },
+    { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
   ],
+  // 4. Teacher — own subjects: attendance + grades + messaging
   teacher: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/teacher" },
-    { icon: CalendarDays, label: "Attendance", href: "/attendance" },
-    { icon: ClipboardCheck, label: "Exams", href: "/exams" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/teacher" },
+    { icon: CalendarDays,    label: "Attendance",  href: "/attendance" },
+    { icon: ClipboardCheck,  label: "Exams",       href: "/exams" },
+    { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
   ],
+  // 5. Class Teacher — full assigned-class control
   class_teacher: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/teacher" },
-    { icon: CalendarDays, label: "Attendance", href: "/attendance" },
-    { icon: ClipboardCheck, label: "Exams", href: "/exams" },
-    { icon: GraduationCap, label: "Students", href: "/admissions" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/class-teacher" },
+    { icon: GraduationCap,   label: "Class Roster",href: "/admissions" },
+    { icon: CalendarDays,    label: "Attendance",  href: "/attendance" },
+    { icon: ClipboardCheck,  label: "Exams",       href: "/exams" },
+    { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
   ],
+  // 6. Exam Coordinator — exam module only
   exam_coordinator: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
-    { icon: ClipboardCheck, label: "Exams", href: "/exams" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/exam-coordinator" },
+    { icon: ClipboardCheck,  label: "Exams",       href: "/exams" },
+    { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
   ],
+  // 7. Transport Manager — transport module only
   transport_manager: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
-    { icon: Bus, label: "Transport", href: "/settings" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/transport" },
+    { icon: Bus,             label: "Transport",   href: "/transport" },
   ],
+  // 8. Librarian — library module only (NO fees access)
   librarian: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
-    { icon: Library, label: "Library", href: "/settings" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/librarian" },
+    { icon: Library,         label: "Library",     href: "/library" },
   ],
+  // 9. Hostel Warden — hostel module only
   hostel_warden: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/admin" },
-    { icon: HomeIcon, label: "Hostel", href: "/settings" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/hostel" },
+    { icon: HomeIcon,        label: "Hostel",      href: "/hostel" },
   ],
+  // 10. Student — strict read-only personal data
   student: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/student" },
-    { icon: CalendarDays, label: "Attendance", href: "/attendance" },
-    { icon: ClipboardCheck, label: "Exams", href: "/exams" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/student" },
+    { icon: CalendarDays,    label: "Attendance",  href: "/attendance" },
+    { icon: ClipboardCheck,  label: "Exams",       href: "/exams" },
+    { icon: CreditCard,      label: "Fees",        href: "/fees" },
   ],
+  // 11. Parent — strict read-only child data + messaging w/ teachers
   parent: [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard/parent" },
-    { icon: BookOpen, label: "Parent Portal", href: "/parent-portal" },
-    { icon: MessageSquare, label: "Messaging", href: "/messaging" },
+    { icon: LayoutDashboard, label: "Dashboard",   href: "/dashboard/parent" },
+    { icon: BookOpen,        label: "Parent Portal", href: "/parent-portal" },
+    { icon: CreditCard,      label: "Fees",        href: "/fees" },
+    { icon: MessageSquare,   label: "Messaging",   href: "/messaging" },
   ],
 };
 
