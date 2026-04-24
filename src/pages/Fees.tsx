@@ -12,6 +12,7 @@ import { useIsReadOnly } from "@/lib/auth-context";
 export default function Fees() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalCollected: "₹0", pendingDues: "₹0", thisMonth: "₹0", paidStudents: "0" });
+  const readOnly = useIsReadOnly();
 
   useEffect(() => {
     // TODO: fetch fee stats from API
