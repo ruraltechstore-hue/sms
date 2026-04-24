@@ -43,12 +43,12 @@ export default function Exams() {
       <Tabs defaultValue="schedule" className="space-y-4">
         <TabsList>
           <TabsTrigger value="schedule">Exam Schedule</TabsTrigger>
-          <TabsTrigger value="grades">Grades & Report Cards</TabsTrigger>
+          {!readOnly && <TabsTrigger value="grades">Grades & Report Cards</TabsTrigger>}
           <TabsTrigger value="analytics">Performance Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="schedule"><ExamSchedule /></TabsContent>
-        <TabsContent value="grades"><GradeEntry /></TabsContent>
+        {!readOnly && <TabsContent value="grades"><GradeEntry /></TabsContent>}
         <TabsContent value="analytics"><PerformanceAnalytics /></TabsContent>
       </Tabs>
     </div>
