@@ -11,9 +11,14 @@ import { StudentProfile } from "@/components/admissions/StudentProfile";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingState } from "@/components/LoadingState";
 import { studentService } from "@/lib/services/studentService";
+import { useAuth } from "@/lib/auth-context";
 import type { Student } from "@/lib/types";
 
+const ROLES_THAT_CAN_CREATE: ReadonlyArray<string> = ["principal", "sms_admin", "front_desk"];
+
 export default function Admissions() {
+  const { user } = useAuth();
+  const canCreate = user ? ROLES_THAT_CAN_CREATE.includes(user.role) : false;
   const [showForm, setShowForm] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
@@ -45,9 +50,11 @@ export default function Admissions() {
           <h2 className="text-2xl font-heading font-bold">Student & Admissions</h2>
           <p className="text-muted-foreground">Manage students, applications, and enrollment</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="bg-gradient-primary text-primary-foreground gap-2">
-          <Plus className="h-4 w-4" /> New Admission
-        </Button>
+        {canCreate && (
+          <Button onClick={() => setShowForm(true)} className="bg-gradient-primary text-primary-foreground gap-2">
+            <Plus className="h-4 w-4" /> New Admission
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

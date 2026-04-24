@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import type { User, UserRole, RoleGroup } from "@/lib/types";
-import { ROLE_GROUP } from "@/lib/types";
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from "react";
+import type { User, UserRole } from "@/lib/types";
 import { authService } from "@/lib/services/authService";
 import { supabase } from "@/integrations/supabase/client";
+import { isReadOnlyRole } from "@/lib/rbac";
 
 export type { UserRole, User };
 
@@ -31,19 +31,22 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   parent: "Parent",
 };
 
-const GROUP_DASHBOARD: Record<RoleGroup, string> = {
-  admin: "/dashboard/admin",
-  teacher: "/dashboard/teacher",
-  student: "/dashboard/student",
-  parent: "/dashboard/parent",
-};
-
 /**
- * Maps any of the 11 roles to its dashboard route via its role group.
+ * One dedicated dashboard route per role.
  */
-export const ROLE_DASHBOARD: Record<UserRole, string> = Object.fromEntries(
-  (Object.keys(ROLE_GROUP) as UserRole[]).map((r) => [r, GROUP_DASHBOARD[ROLE_GROUP[r]]])
-) as Record<UserRole, string>;
+export const ROLE_DASHBOARD: Record<UserRole, string> = {
+  principal:         "/dashboard/principal",
+  sms_admin:         "/dashboard/admin",
+  front_desk:        "/dashboard/front-desk",
+  teacher:           "/dashboard/teacher",
+  class_teacher:     "/dashboard/class-teacher",
+  exam_coordinator:  "/dashboard/exam-coordinator",
+  transport_manager: "/dashboard/transport",
+  librarian:         "/dashboard/librarian",
+  hostel_warden:     "/dashboard/hostel",
+  student:           "/dashboard/student",
+  parent:            "/dashboard/parent",
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -136,3 +139,14 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
+
+/**
+ * Returns true when the current user must NOT see any create/update/delete UI.
+ * Currently true for student & parent roles. Combined with backend RLS to
+ * provide defense-in-depth.
+ */
+export function useIsReadOnly(): boolean {
+  const { user } = useAuth();
+  return useMemo(() => (user ? isReadOnlyRole(user.role) : true), [user]);
+}
+

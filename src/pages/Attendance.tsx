@@ -7,10 +7,12 @@ import { AttendanceMarking } from "@/components/attendance/AttendanceMarking";
 import { AttendanceCalendar } from "@/components/attendance/AttendanceCalendar";
 import { AttendanceCharts } from "@/components/attendance/AttendanceCharts";
 import { LoadingState } from "@/components/LoadingState";
+import { useIsReadOnly } from "@/lib/auth-context";
 
 export default function Attendance() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ present: 0, absent: 0, late: 0, overallRate: 0 });
+  const readOnly = useIsReadOnly();
 
   useEffect(() => {
     // TODO: fetch attendance stats from API
@@ -39,18 +41,22 @@ export default function Attendance() {
         ))}
       </div>
 
-      <Tabs defaultValue="marking" className="space-y-4">
+      <Tabs defaultValue={readOnly ? "calendar" : "marking"} className="space-y-4">
         <TabsList className="bg-secondary/50">
-          <TabsTrigger value="marking" className="gap-2"><ClipboardCheck className="h-4 w-4" /> Mark Attendance</TabsTrigger>
+          {!readOnly && (
+            <TabsTrigger value="marking" className="gap-2"><ClipboardCheck className="h-4 w-4" /> Mark Attendance</TabsTrigger>
+          )}
           <TabsTrigger value="calendar" className="gap-2"><CalendarRange className="h-4 w-4" /> Calendar</TabsTrigger>
           <TabsTrigger value="analytics" className="gap-2"><BarChart3 className="h-4 w-4" /> Analytics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="marking">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <AttendanceMarking />
-          </motion.div>
-        </TabsContent>
+        {!readOnly && (
+          <TabsContent value="marking">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <AttendanceMarking />
+            </motion.div>
+          </TabsContent>
+        )}
 
         <TabsContent value="calendar">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border bg-card p-6">

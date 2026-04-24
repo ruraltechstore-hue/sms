@@ -7,10 +7,12 @@ import { FeeStructureTable } from "@/components/fees/FeeStructureTable";
 import { PaymentTracker } from "@/components/fees/PaymentTracker";
 import { FeeAnalytics } from "@/components/fees/FeeAnalytics";
 import { LoadingState } from "@/components/LoadingState";
+import { useIsReadOnly } from "@/lib/auth-context";
 
 export default function Fees() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalCollected: "₹0", pendingDues: "₹0", thisMonth: "₹0", paidStudents: "0" });
+  const readOnly = useIsReadOnly();
 
   useEffect(() => {
     // TODO: fetch fee stats from API
@@ -22,8 +24,10 @@ export default function Fees() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-heading font-bold">Fee Management</h2>
-        <p className="text-muted-foreground">Track payments, dues, and financial reports</p>
+        <h2 className="text-2xl font-heading font-bold">{readOnly ? "Fee Status" : "Fee Management"}</h2>
+        <p className="text-muted-foreground">
+          {readOnly ? "View payments, dues, and receipts" : "Track payments, dues, and financial reports"}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -41,13 +45,13 @@ export default function Fees() {
 
       <Tabs defaultValue="payments" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="payments">Payment Tracker</TabsTrigger>
-          <TabsTrigger value="structures">Fee Structures</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics & Dues</TabsTrigger>
+          <TabsTrigger value="payments">{readOnly ? "My Payments" : "Payment Tracker"}</TabsTrigger>
+          {!readOnly && <TabsTrigger value="structures">Fee Structures</TabsTrigger>}
+          <TabsTrigger value="analytics">{readOnly ? "Summary" : "Analytics & Dues"}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="payments"><PaymentTracker /></TabsContent>
-        <TabsContent value="structures"><FeeStructureTable /></TabsContent>
+        {!readOnly && <TabsContent value="structures"><FeeStructureTable /></TabsContent>}
         <TabsContent value="analytics"><FeeAnalytics /></TabsContent>
       </Tabs>
     </div>
