@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   GraduationCap, Users, CreditCard, CalendarDays, TrendingUp,
   ClipboardCheck, BookOpen, UserCheck, Bus, Library as LibraryIcon,
-  Home as HomeIcon, ShieldCheck, Megaphone, Award, FileCheck,
+  Home as HomeIcon, ShieldCheck, Megaphone, Award, FileCheck, ClipboardList,
 } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { useAuth } from "@/lib/auth-context";
@@ -376,20 +376,33 @@ function TeacherDashboard() {
 // ============================================================
 function ClassTeacherDashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ students: 0, present: 0, absent: 0 });
+  const [stats, setStats] = useState({ students: 0, present: 0, absent: 0, pendingAssignments: 0 });
   const [attendance, setAttendance] = useState<PieDatum[]>([]);
   const [classDist, setClassDist] = useState<PieDatum[]>([]);
+  const [submissionPie, setSubmissionPie] = useState<PieDatum[]>([]);
 
   useEffect(() => {
     (async () => {
-      const [students, a, cd] = await Promise.all([
+      const today = new Date().toISOString().slice(0, 10);
+      const [students, a, cd, { data: assignments }, { data: subs }] = await Promise.all([
         countRows("students"),
         fetchAttendancePie(),
         fetchClassDistributionPie(),
+        supabase.from("assignments").select("id, due_date"),
+        supabase.from("assignment_submissions").select("status"),
       ]);
       const present = a.find((d) => d.name === "Present")?.value ?? 0;
       const absent  = a.find((d) => d.name === "Absent")?.value ?? 0;
-      setStats({ students, present, absent });
+      const pendingAssignments = (assignments ?? []).filter((x: any) => !x.due_date || x.due_date >= today).length;
+      const buckets: Record<string, number> = { pending: 0, submitted: 0, late: 0, graded: 0 };
+      for (const s of subs ?? []) buckets[(s as any).status] = (buckets[(s as any).status] ?? 0) + 1;
+      setSubmissionPie([
+        { name: "Pending",   value: buckets.pending,   color: PALETTE.warning },
+        { name: "Submitted", value: buckets.submitted, color: PALETTE.primary },
+        { name: "Late",      value: buckets.late,      color: PALETTE.destructive },
+        { name: "Graded",    value: buckets.graded,    color: PALETTE.success },
+      ]);
+      setStats({ students, present, absent, pendingAssignments });
       setAttendance(a);
       setClassDist(cd);
       setLoading(false);
@@ -400,20 +413,22 @@ function ClassTeacherDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { title: "Class Strength", value: String(stats.students), icon: Users,       iconColor: "text-primary" },
-          { title: "Present Today",  value: String(stats.present),  icon: UserCheck,   iconColor: "text-success" },
-          { title: "Absent Today",   value: String(stats.absent),   icon: CalendarDays,iconColor: "text-destructive" },
+          { title: "Class Strength", value: String(stats.students),           icon: Users,         iconColor: "text-primary" },
+          { title: "Present Today",  value: String(stats.present),            icon: UserCheck,     iconColor: "text-success" },
+          { title: "Absent Today",   value: String(stats.absent),             icon: CalendarDays,  iconColor: "text-destructive" },
+          { title: "Pending Work",   value: String(stats.pendingAssignments), icon: ClipboardList, iconColor: "text-warning" },
         ].map((s, i) => (
           <motion.div key={s.title} {...anim} transition={{ delay: i * 0.05 }}>
             <StatCard {...s} />
           </motion.div>
         ))}
       </div>
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-3 gap-6">
         <PieCard title="Class Attendance"   data={attendance} />
         <PieCard title="Class Distribution" data={classDist} />
+        <PieCard title="Submission Status"  data={submissionPie} />
       </div>
     </div>
   );
