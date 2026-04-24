@@ -69,18 +69,31 @@ const App = () => (
           <Route path="/dashboard" element={<DashboardRedirect />} />
 
           {/* Protected app — RBAC pulled from ROUTE_PERMISSIONS automatically */}
-          <Route path="/dashboard/admin" element={<Guarded><Dashboard /></Guarded>} />
-          <Route path="/dashboard/teacher" element={<Guarded><Dashboard /></Guarded>} />
-          <Route path="/dashboard/student" element={<Guarded><Dashboard /></Guarded>} />
-          <Route path="/dashboard/parent" element={<Guarded><Dashboard /></Guarded>} />
-          <Route path="/admissions" element={<Guarded><Admissions /></Guarded>} />
-          <Route path="/attendance" element={<Guarded><Attendance /></Guarded>} />
-          <Route path="/fees" element={<Guarded><Fees /></Guarded>} />
-          <Route path="/messaging" element={<Guarded><Messaging /></Guarded>} />
-          <Route path="/exams" element={<Guarded><Exams /></Guarded>} />
-          <Route path="/staff" element={<Guarded><Staff /></Guarded>} />
+          {/* Per-role dashboards (one per role) */}
+          <Route path="/dashboard/principal"        element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/admin"            element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/front-desk"       element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/teacher"          element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/class-teacher"    element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/exam-coordinator" element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/transport"        element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/librarian"        element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/hostel"           element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/student"          element={<Guarded><Dashboard /></Guarded>} />
+          <Route path="/dashboard/parent"           element={<Guarded><Dashboard /></Guarded>} />
+
+          {/* Modules */}
+          <Route path="/admissions"    element={<Guarded><Admissions /></Guarded>} />
+          <Route path="/attendance"    element={<Guarded><Attendance /></Guarded>} />
+          <Route path="/fees"          element={<Guarded><Fees /></Guarded>} />
+          <Route path="/messaging"     element={<Guarded><Messaging /></Guarded>} />
+          <Route path="/exams"         element={<Guarded><Exams /></Guarded>} />
+          <Route path="/staff"         element={<Guarded><Staff /></Guarded>} />
           <Route path="/parent-portal" element={<Guarded><ParentPortal /></Guarded>} />
-          <Route path="/settings" element={<Guarded><Settings /></Guarded>} />
+          <Route path="/transport"     element={<Guarded><Transport /></Guarded>} />
+          <Route path="/library"       element={<Guarded><Library /></Guarded>} />
+          <Route path="/hostel"        element={<Guarded><Hostel /></Guarded>} />
+          <Route path="/settings"      element={<Guarded><Settings /></Guarded>} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
