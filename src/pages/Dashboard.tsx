@@ -5,7 +5,8 @@ import {
   ClipboardCheck, Award, BookOpen, UserCheck, Clock, ArrowUpRight, ArrowDownRight,
 } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
-import { useAuth, UserRole } from "@/lib/auth-context";
+import { useAuth } from "@/lib/auth-context";
+import { ROLE_GROUP, type RoleGroup } from "@/lib/types";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, Legend, CartesianGrid,
@@ -299,12 +300,12 @@ export default function Dashboard() {
   const { user } = useAuth();
   if (!user) return null;
 
-  const dashboards: Record<UserRole, JSX.Element> = {
+  const dashboards: Record<RoleGroup, JSX.Element> = {
     admin: <AdminDashboard />,
     teacher: <TeacherDashboard />,
     student: <StudentDashboard />,
     parent: <ParentDashboard />,
   };
 
-  return dashboards[user.role];
+  return dashboards[ROLE_GROUP[user.role]];
 }
