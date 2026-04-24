@@ -43,11 +43,14 @@
     --input: 214 32% 91%;
     --ring: 217 91% 60%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
     --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(262 83% 58%));
     --gradient-hero: linear-gradient(135deg, hsl(217 91% 60% / 0.08), hsl(262 83% 58% / 0.08));
     --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 40% 98%));
+    --gradient-glass: linear-gradient(180deg, hsl(0 0% 100% / 0.7), hsl(0 0% 100% / 0.4));
+    --glass-border: hsl(217 32% 80% / 0.4);
+    --glass-bg: hsl(0 0% 100% / 0.6);
 
     --shadow-sm: 0 1px 2px hsl(222 47% 11% / 0.04);
     --shadow-md: 0 4px 16px hsl(222 47% 11% / 0.06);
@@ -64,57 +67,74 @@
     --sidebar-ring: 217 91% 60%;
   }
 
+  /* ============================================================
+     PREMIUM DARK (Linear / Vercel inspired)
+     Deep near-black background, electric blue + violet gradients,
+     frosted glass surfaces, soft glow on focus / primary actions.
+     ============================================================ */
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 96%;
+    --background: 224 47% 4%;
+    --foreground: 210 30% 96%;
 
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 96%;
+    --card: 224 40% 7%;
+    --card-foreground: 210 30% 96%;
 
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 224 40% 7%;
+    --popover-foreground: 210 30% 96%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 217 95% 65%;
+    --primary-foreground: 224 47% 4%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 96%;
+    --secondary: 224 30% 12%;
+    --secondary-foreground: 210 30% 96%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 224 25% 11%;
+    --muted-foreground: 217 12% 62%;
 
-    --accent: 262 83% 58%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 262 90% 70%;
+    --accent-foreground: 224 47% 4%;
 
-    --success: 142 71% 45%;
-    --success-foreground: 0 0% 100%;
+    --success: 152 76% 50%;
+    --success-foreground: 224 47% 4%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 38 95% 60%;
+    --warning-foreground: 224 47% 4%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 96%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 30% 96%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 217 91% 60%;
+    --border: 224 28% 14%;
+    --input: 224 28% 14%;
+    --ring: 217 95% 65%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60% / 0.12), hsl(262 83% 58% / 0.08));
-    --gradient-card: linear-gradient(135deg, hsl(222 47% 9%), hsl(222 47% 12%));
+    /* Gradients & glass */
+    --gradient-primary: linear-gradient(135deg, hsl(217 95% 65%), hsl(262 90% 70%));
+    --gradient-hero: radial-gradient(ellipse at top, hsl(217 95% 65% / 0.18), transparent 60%),
+                     radial-gradient(ellipse at bottom right, hsl(262 90% 70% / 0.12), transparent 60%);
+    --gradient-card: linear-gradient(180deg, hsl(224 35% 9% / 0.8), hsl(224 40% 6% / 0.8));
+    --gradient-glass: linear-gradient(180deg, hsl(217 30% 16% / 0.55), hsl(224 35% 8% / 0.55));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(217 95% 65% / 0.15) 0px, transparent 50%),
+                     radial-gradient(at 100% 0%, hsl(262 90% 70% / 0.12) 0px, transparent 50%),
+                     radial-gradient(at 50% 100%, hsl(217 95% 65% / 0.08) 0px, transparent 50%);
 
-    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-md: 0 4px 16px hsl(0 0% 0% / 0.3);
-    --shadow-lg: 0 8px 32px hsl(0 0% 0% / 0.4);
-    --shadow-glow: 0 0 40px hsl(217 91% 60% / 0.25);
+    --glass-bg: hsl(224 30% 10% / 0.55);
+    --glass-border: hsl(217 50% 70% / 0.12);
+    --glass-highlight: hsl(217 95% 75% / 0.1);
 
-    --sidebar-background: 222 47% 8%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 15%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 217 91% 60%;
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.4);
+    --shadow-md: 0 4px 24px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 16px 48px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 32px hsl(217 95% 65% / 0.35);
+    --shadow-glow-accent: 0 0 32px hsl(262 90% 70% / 0.3);
+
+    --sidebar-background: 224 47% 4%;
+    --sidebar-foreground: 210 30% 96%;
+    --sidebar-primary: 217 95% 65%;
+    --sidebar-primary-foreground: 224 47% 4%;
+    --sidebar-accent: 224 30% 11%;
+    --sidebar-accent-foreground: 210 30% 96%;
+    --sidebar-border: 224 28% 12%;
+    --sidebar-ring: 217 95% 65%;
   }
 }
 
@@ -122,12 +142,33 @@
   * {
     @apply border-border;
   }
+  html, body, #root {
+    min-height: 100vh;
+  }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+  /* Subtle ambient mesh on the dark theme — adds depth without noise. */
+  .dark body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: var(--gradient-mesh);
+    opacity: 0.6;
+    z-index: 0;
+  }
+  .dark #root {
+    position: relative;
+    z-index: 1;
   }
 }
 
@@ -142,11 +183,74 @@
   .bg-gradient-hero {
     background-image: var(--gradient-hero);
   }
+  .bg-gradient-mesh {
+    background-image: var(--gradient-mesh);
+  }
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
-  
-  /* Micro-interaction utilities */
+  .shadow-glow-accent {
+    box-shadow: var(--shadow-glow-accent);
+  }
+
+  /* ============ Glassmorphism ============ */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+  }
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+  /* Inner top highlight that mimics frosted glass */
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--glass-highlight, hsl(0 0% 100% / 0.3)) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+  .glass-strong {
+    background: hsl(var(--card));
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border: 1px solid var(--glass-border);
+  }
+
+  /* Gradient border (1px) — used for premium cards and active states */
+  .gradient-border {
+    position: relative;
+    background-clip: padding-box;
+    border: 1px solid transparent;
+  }
+  .gradient-border::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: var(--gradient-primary);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ============ Micro-interactions ============ */
   .hover-lift {
     @apply transition-all duration-300;
   }
@@ -169,8 +273,7 @@
   .active-press:active {
     transform: scale(0.98);
   }
-  
-  /* Link underline animation */
+
   .link-underline {
     @apply relative;
   }
@@ -185,7 +288,6 @@
     transform-origin: bottom left;
   }
 
-  /* Staggered children animation */
   .stagger-children > * {
     animation: fade-in 0.4s ease-out backwards;
   }
@@ -200,7 +302,8 @@
 
   /* Smooth scrollbar */
   .scrollbar-thin::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
+    height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     @apply bg-transparent;
@@ -209,6 +312,6 @@
     @apply bg-border rounded-full;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
+    @apply bg-muted-foreground/40;
   }
 }
