@@ -30,6 +30,9 @@ interface Assignment {
   kind: Kind;
   due_date: string | null;
   created_at: string;
+  attachment_url: string | null;
+  attachment_type: string | null;
+  attachment_name: string | null;
 }
 
 interface ClassRow { id: string; name: string; section: string | null }
