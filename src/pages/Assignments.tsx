@@ -112,10 +112,53 @@ export default function Assignments() {
     }));
   }, [submissions]);
 
+  const ACCEPTED_TYPES = "application/pdf,image/*,video/*";
+  const MAX_SIZE_MB = 50;
+
+  const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    if (!f) { setFile(null); return; }
+    if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+      toast({ title: "File too large", description: `Max ${MAX_SIZE_MB} MB.`, variant: "destructive" });
+      e.target.value = "";
+      return;
+    }
+    const ok = f.type === "application/pdf" || f.type.startsWith("image/") || f.type.startsWith("video/");
+    if (!ok) {
+      toast({ title: "Unsupported file", description: "Only PDF, images and videos are allowed.", variant: "destructive" });
+      e.target.value = "";
+      return;
+    }
+    setFile(f);
+  };
+
+  const uploadAttachment = async (): Promise<{ url: string; type: string; name: string } | null> => {
+    if (!file) return null;
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${user?.id ?? "anon"}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("assignment-attachments").upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type,
+    });
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      return null;
+    }
+    const { data } = supabase.storage.from("assignment-attachments").getPublicUrl(path);
+    return { url: data.publicUrl, type: file.type, name: file.name };
+  };
+
   const handleCreate = async () => {
     if (!form.title || !form.class_id) {
       toast({ title: "Missing fields", description: "Title and class are required.", variant: "destructive" });
       return;
+    }
+    setUploading(true);
+    let attachment: { url: string; type: string; name: string } | null = null;
+    if (file) {
+      attachment = await uploadAttachment();
+      if (!attachment) { setUploading(false); return; }
     }
     const { error } = await supabase.from("assignments").insert({
       title: form.title,
@@ -124,7 +167,11 @@ export default function Assignments() {
       class_id: form.class_id,
       kind: form.kind,
       due_date: form.due_date || null,
+      attachment_url: attachment?.url ?? null,
+      attachment_type: attachment?.type ?? null,
+      attachment_name: attachment?.name ?? null,
     });
+    setUploading(false);
     if (error) {
       toast({ title: "Failed to create", description: error.message, variant: "destructive" });
       return;
@@ -132,7 +179,16 @@ export default function Assignments() {
     toast({ title: "Created", description: `${form.kind} added.` });
     setOpen(false);
     setForm({ title: "", description: "", subject: "", class_id: "", kind: "assignment", due_date: "" });
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     load();
+  };
+
+  const attachmentIcon = (type: string | null) => {
+    if (!type) return FileText;
+    if (type.startsWith("image/")) return ImageIcon;
+    if (type.startsWith("video/")) return Video;
+    return FileText;
   };
 
   const handleDelete = async (id: string) => {
