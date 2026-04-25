@@ -67,6 +67,9 @@ export default function Assignments() {
   const [classes, setClasses] = useState<ClassRow[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     title: "", description: "", subject: "", class_id: "", kind: "assignment" as Kind, due_date: "",
   });
