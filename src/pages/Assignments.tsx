@@ -260,10 +260,51 @@ export default function Assignments() {
                   <Label>Description</Label>
                   <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={3} />
                 </div>
+                <div>
+                  <Label>Attachment (PDF, image or video — max {MAX_SIZE_MB}MB)</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={ACCEPTED_TYPES}
+                      onChange={onPickFile}
+                      className="hidden"
+                      id="assignment-file"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="gap-2"
+                    >
+                      <Upload className="h-4 w-4" /> Choose file
+                    </Button>
+                    {file && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+                        <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate max-w-[200px]">{file.name}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => {
+                            setFile(null);
+                            if (fileInputRef.current) fileInputRef.current.value = "";
+                          }}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreate}>Create</Button>
+                <Button variant="outline" onClick={() => setOpen(false)} disabled={uploading}>Cancel</Button>
+                <Button onClick={handleCreate} disabled={uploading}>
+                  {uploading ? "Uploading..." : "Create"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
