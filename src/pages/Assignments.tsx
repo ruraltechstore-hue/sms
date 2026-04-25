@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ClipboardList, Plus, CheckCircle2, Clock, AlertCircle, Trash2 } from "lucide-react";
+import { ClipboardList, Plus, CheckCircle2, Clock, AlertCircle, Trash2, Paperclip, FileText, Image as ImageIcon, Video, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,9 @@ interface Assignment {
   kind: Kind;
   due_date: string | null;
   created_at: string;
+  attachment_url: string | null;
+  attachment_type: string | null;
+  attachment_name: string | null;
 }
 
 interface ClassRow { id: string; name: string; section: string | null }
@@ -64,6 +67,9 @@ export default function Assignments() {
   const [classes, setClasses] = useState<ClassRow[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     title: "", description: "", subject: "", class_id: "", kind: "assignment" as Kind, due_date: "",
   });
@@ -106,10 +112,53 @@ export default function Assignments() {
     }));
   }, [submissions]);
 
+  const ACCEPTED_TYPES = "application/pdf,image/*,video/*";
+  const MAX_SIZE_MB = 50;
+
+  const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    if (!f) { setFile(null); return; }
+    if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+      toast({ title: "File too large", description: `Max ${MAX_SIZE_MB} MB.`, variant: "destructive" });
+      e.target.value = "";
+      return;
+    }
+    const ok = f.type === "application/pdf" || f.type.startsWith("image/") || f.type.startsWith("video/");
+    if (!ok) {
+      toast({ title: "Unsupported file", description: "Only PDF, images and videos are allowed.", variant: "destructive" });
+      e.target.value = "";
+      return;
+    }
+    setFile(f);
+  };
+
+  const uploadAttachment = async (): Promise<{ url: string; type: string; name: string } | null> => {
+    if (!file) return null;
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${user?.id ?? "anon"}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("assignment-attachments").upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type,
+    });
+    if (error) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      return null;
+    }
+    const { data } = supabase.storage.from("assignment-attachments").getPublicUrl(path);
+    return { url: data.publicUrl, type: file.type, name: file.name };
+  };
+
   const handleCreate = async () => {
     if (!form.title || !form.class_id) {
       toast({ title: "Missing fields", description: "Title and class are required.", variant: "destructive" });
       return;
+    }
+    setUploading(true);
+    let attachment: { url: string; type: string; name: string } | null = null;
+    if (file) {
+      attachment = await uploadAttachment();
+      if (!attachment) { setUploading(false); return; }
     }
     const { error } = await supabase.from("assignments").insert({
       title: form.title,
@@ -118,7 +167,11 @@ export default function Assignments() {
       class_id: form.class_id,
       kind: form.kind,
       due_date: form.due_date || null,
+      attachment_url: attachment?.url ?? null,
+      attachment_type: attachment?.type ?? null,
+      attachment_name: attachment?.name ?? null,
     });
+    setUploading(false);
     if (error) {
       toast({ title: "Failed to create", description: error.message, variant: "destructive" });
       return;
@@ -126,7 +179,16 @@ export default function Assignments() {
     toast({ title: "Created", description: `${form.kind} added.` });
     setOpen(false);
     setForm({ title: "", description: "", subject: "", class_id: "", kind: "assignment", due_date: "" });
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
     load();
+  };
+
+  const attachmentIcon = (type: string | null) => {
+    if (!type) return FileText;
+    if (type.startsWith("image/")) return ImageIcon;
+    if (type.startsWith("video/")) return Video;
+    return FileText;
   };
 
   const handleDelete = async (id: string) => {
@@ -198,10 +260,51 @@ export default function Assignments() {
                   <Label>Description</Label>
                   <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={3} />
                 </div>
+                <div>
+                  <Label>Attachment (PDF, image or video — max {MAX_SIZE_MB}MB)</Label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept={ACCEPTED_TYPES}
+                      onChange={onPickFile}
+                      className="hidden"
+                      id="assignment-file"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="gap-2"
+                    >
+                      <Upload className="h-4 w-4" /> Choose file
+                    </Button>
+                    {file && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+                        <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate max-w-[200px]">{file.name}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => {
+                            setFile(null);
+                            if (fileInputRef.current) fileInputRef.current.value = "";
+                          }}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreate}>Create</Button>
+                <Button variant="outline" onClick={() => setOpen(false)} disabled={uploading}>Cancel</Button>
+                <Button onClick={handleCreate} disabled={uploading}>
+                  {uploading ? "Uploading..." : "Create"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -253,30 +356,50 @@ export default function Assignments() {
                 <TableHead>Subject</TableHead>
                 <TableHead>Class</TableHead>
                 <TableHead>Due</TableHead>
+                <TableHead>Attachment</TableHead>
                 {!readOnly && <TableHead className="w-12"></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {assignments.map((a) => (
-                <TableRow key={a.id}>
-                  <TableCell>
-                    <Badge variant="outline" className={KIND_BADGE[a.kind]}>{a.kind}</Badge>
-                  </TableCell>
-                  <TableCell className="font-medium">{a.title}</TableCell>
-                  <TableCell className="text-muted-foreground">{a.subject || "—"}</TableCell>
-                  <TableCell>{className(a.class_id)}</TableCell>
-                  <TableCell className="text-muted-foreground">{a.due_date || "—"}</TableCell>
-                  {!readOnly && (
+              {assignments.map((a) => {
+                const Icon = attachmentIcon(a.attachment_type);
+                return (
+                  <TableRow key={a.id}>
                     <TableCell>
-                      {(user?.role === "class_teacher" || user?.role === "principal" || user?.role === "sms_admin") && (
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)} className="h-8 w-8 text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <Badge variant="outline" className={KIND_BADGE[a.kind]}>{a.kind}</Badge>
+                    </TableCell>
+                    <TableCell className="font-medium">{a.title}</TableCell>
+                    <TableCell className="text-muted-foreground">{a.subject || "—"}</TableCell>
+                    <TableCell>{className(a.class_id)}</TableCell>
+                    <TableCell className="text-muted-foreground">{a.due_date || "—"}</TableCell>
+                    <TableCell>
+                      {a.attachment_url ? (
+                        <a
+                          href={a.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-primary hover:underline text-sm"
+                          title={a.attachment_name ?? "Open attachment"}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="truncate max-w-[140px]">{a.attachment_name ?? "View"}</span>
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
                       )}
                     </TableCell>
-                  )}
-                </TableRow>
-              ))}
+                    {!readOnly && (
+                      <TableCell>
+                        {(user?.role === "class_teacher" || user?.role === "principal" || user?.role === "sms_admin") && (
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)} className="h-8 w-8 text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
