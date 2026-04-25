@@ -356,30 +356,50 @@ export default function Assignments() {
                 <TableHead>Subject</TableHead>
                 <TableHead>Class</TableHead>
                 <TableHead>Due</TableHead>
+                <TableHead>Attachment</TableHead>
                 {!readOnly && <TableHead className="w-12"></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {assignments.map((a) => (
-                <TableRow key={a.id}>
-                  <TableCell>
-                    <Badge variant="outline" className={KIND_BADGE[a.kind]}>{a.kind}</Badge>
-                  </TableCell>
-                  <TableCell className="font-medium">{a.title}</TableCell>
-                  <TableCell className="text-muted-foreground">{a.subject || "—"}</TableCell>
-                  <TableCell>{className(a.class_id)}</TableCell>
-                  <TableCell className="text-muted-foreground">{a.due_date || "—"}</TableCell>
-                  {!readOnly && (
+              {assignments.map((a) => {
+                const Icon = attachmentIcon(a.attachment_type);
+                return (
+                  <TableRow key={a.id}>
                     <TableCell>
-                      {(user?.role === "class_teacher" || user?.role === "principal" || user?.role === "sms_admin") && (
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)} className="h-8 w-8 text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <Badge variant="outline" className={KIND_BADGE[a.kind]}>{a.kind}</Badge>
+                    </TableCell>
+                    <TableCell className="font-medium">{a.title}</TableCell>
+                    <TableCell className="text-muted-foreground">{a.subject || "—"}</TableCell>
+                    <TableCell>{className(a.class_id)}</TableCell>
+                    <TableCell className="text-muted-foreground">{a.due_date || "—"}</TableCell>
+                    <TableCell>
+                      {a.attachment_url ? (
+                        <a
+                          href={a.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-primary hover:underline text-sm"
+                          title={a.attachment_name ?? "Open attachment"}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="truncate max-w-[140px]">{a.attachment_name ?? "View"}</span>
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
                       )}
                     </TableCell>
-                  )}
-                </TableRow>
-              ))}
+                    {!readOnly && (
+                      <TableCell>
+                        {(user?.role === "class_teacher" || user?.role === "principal" || user?.role === "sms_admin") && (
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(a.id)} className="h-8 w-8 text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
